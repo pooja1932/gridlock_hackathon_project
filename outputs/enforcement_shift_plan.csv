@@ -1,0 +1,41 @@
+priority_rank,grid_id,latitude,longitude,police_station,junction_name,risk_band,congestion_impact_score,best_enforcement_hours,recommended_action
+1,"12.981,77.61",12.981083513578422,77.61013528841559,Shivajinagar,BTP051 - Safina Plaza Junction,High,75.17,"10:00, 09:00, 11:00",Focused patrol during top 2 peak hours
+2,"12.964,77.577",12.964077901563494,77.5768995240612,City Market,BTP082 - KR Market Junction,High,68.51,"00:00, 01:00, 10:00",Focused patrol during top 2 peak hours
+3,"12.977,77.576",12.977186446651997,77.57613171631563,Upparpet,BTP040 - Elite Junction,High,68.23,"09:00, 08:00, 10:00",Focused patrol during top 2 peak hours
+4,"12.973,77.579",12.973088122738801,77.579035767836,Upparpet,BTP044 - Sagar Theatre Junction,High,66.29,"10:00, 09:00, 08:00",Focused patrol during top 2 peak hours
+5,"12.965,77.576",12.964683566373512,77.57617047206416,City Market,BTP082 - KR Market Junction,High,62.68,"09:00, 01:00, 08:00",Focused patrol during top 2 peak hours
+6,"12.982,77.606",12.98203888522829,77.60631703724262,Shivajinagar,BTP051 - Safina Plaza Junction,High,62.66,"10:00, 08:00, 11:00",Focused patrol during top 2 peak hours
+7,"12.974,77.545",12.974176691506228,77.54500246659116,Vijayanagara,BTP020 - Hosahalli Metro Station,High,61.93,"04:00, 08:00, 06:00",Focused patrol during top 2 peak hours
+8,"12.977,77.577",12.977003156528578,77.57706455133717,Upparpet,BTP040 - Elite Junction,High,61.92,"08:00, 09:00, 10:00",Focused patrol during top 2 peak hours
+9,"12.976,77.577",12.976102326406686,77.57725434222841,Upparpet,BTP040 - Elite Junction,High,61.78,"09:00, 08:00, 10:00",Focused patrol during top 2 peak hours
+10,"12.984,77.603",12.98419388496058,77.60320002601576,Shivajinagar,BTP211 - Central Street Junction,High,61.33,"10:00, 11:00, 08:00",Focused patrol during top 2 peak hours
+11,"12.984,77.604",12.984000441963191,77.6036676590184,Shivajinagar,BTP211 - Central Street Junction,High,60.72,"10:00, 09:00, 11:00",Focused patrol during top 2 peak hours
+12,"12.934,77.691",12.933868001674734,77.69086837725041,HAL Old Airport,No Junction,High,60.05,"04:00, 05:00, 09:00",Focused patrol during top 2 peak hours
+13,"12.982,77.608",12.981729046022728,77.60815689673296,Shivajinagar,BTP051 - Safina Plaza Junction,Medium,59.7,"10:00, 08:00, 11:00",Warning drive + repeat-offender monitoring
+14,"12.976,77.578",12.97605577986744,77.5781520706711,Upparpet,BTP044 - Sagar Theatre Junction,Medium,59.65,"09:00, 08:00, 10:00",Warning drive + repeat-offender monitoring
+15,"12.965,77.539",12.964869075141685,77.5388754314141,Vijayanagara,"BTP016 - 5th Main Road, RPC Layout",Medium,59.49,"03:00, 11:00, 10:00",Warning drive + repeat-offender monitoring
+16,"12.975,77.576",12.975338713625685,77.57613988888018,Upparpet,BTP040 - Elite Junction,Medium,59.23,"09:00, 08:00, 10:00",Warning drive + repeat-offender monitoring
+17,"12.98,77.607",12.979780905111111,77.607192028,Shivajinagar,BTP051 - Safina Plaza Junction,Medium,58.94,"10:00, 09:00, 11:00",Warning drive + repeat-offender monitoring
+18,"13.0,77.55",13.000026266409181,77.54983345235279,Malleshwaram,BTP027 - Modi Bridge Junction,Medium,58.87,"08:00, 09:00, 07:00",Warning drive + repeat-offender monitoring
+19,"12.977,77.58",12.976957232935561,77.57998196475737,Upparpet,BTP044 - Sagar Theatre Junction,Medium,58.68,"09:00, 08:00, 10:00",Warning drive + repeat-offender monitoring
+20,"12.981,77.609",12.981358564951357,77.60890098808918,Shivajinagar,BTP051 - Safina Plaza Junction,Medium,58.36,"08:00, 10:00, 09:00",Warning drive + repeat-offender monitoring
+21,"12.965,77.584",12.964926944929926,77.58404453948887,Halasuru Gate,"BTP080 - NR Road, SP Road Junction",Medium,58.31,"10:00, 08:00, 11:00",Warning drive + repeat-offender monitoring
+22,"12.973,77.551",12.973418069773755,77.55100289954751,Magadi Road,"BTP070 - Cholurpalya Junction, Magadi Road",Medium,57.54,"12:00, 11:00, 10:00",Warning drive + repeat-offender monitoring
+23,"12.981,77.608",12.98100116592179,77.60773138026072,Shivajinagar,BTP051 - Safina Plaza Junction,Medium,57.27,"11:00, 10:00, 08:00",Warning drive + repeat-offender monitoring
+24,"12.975,77.545",12.974615745994065,77.54510551097923,Vijayanagara,BTP020 - Hosahalli Metro Station,Medium,57.23,"08:00, 09:00, 10:00",Warning drive + repeat-offender monitoring
+25,"12.933,77.691",12.93318689982447,77.69120397138695,HAL Old Airport,No Junction,Medium,57.07,"09:00, 04:00, 08:00",Warning drive + repeat-offender monitoring
+26,"12.974,77.579",12.973678509740258,77.5791028080705,Upparpet,BTP044 - Sagar Theatre Junction,Medium,56.75,"08:00, 09:00, 10:00",Warning drive + repeat-offender monitoring
+27,"12.981,77.598",12.981066963868987,77.59841022405323,Shivajinagar,BTP042 - Minsk Square Junction (CTO),Medium,56.67,"08:00, 04:00, 05:00",Warning drive + repeat-offender monitoring
+28,"12.982,77.61",12.981856719789842,77.61018913502626,Shivajinagar,BTP051 - Safina Plaza Junction,Medium,56.62,"10:00, 08:00, 09:00",Warning drive + repeat-offender monitoring
+29,"12.964,77.578",12.96426383380206,77.57801883664078,City Market,BTP082 - KR Market Junction,Medium,56.23,"09:00, 10:00, 08:00",Warning drive + repeat-offender monitoring
+30,"12.974,77.551",12.973672371273713,77.55116188726288,Magadi Road,"BTP070 - Cholurpalya Junction, Magadi Road",Medium,56.23,"11:00, 10:00, 12:00",Warning drive + repeat-offender monitoring
+31,"12.976,77.576",12.975883411158433,77.5760446068143,Upparpet,BTP040 - Elite Junction,Medium,55.98,"08:00, 06:00, 09:00",Warning drive + repeat-offender monitoring
+32,"12.974,77.578",12.974042147986577,77.57824473758389,Upparpet,BTP044 - Sagar Theatre Junction,Medium,55.88,"10:00, 08:00, 09:00",Warning drive + repeat-offender monitoring
+33,"12.978,77.574",12.97803048706084,77.573882588946,Upparpet,BTP045 - Danvanthri Road Junction,Medium,55.8,"09:00, 05:00, 12:00",Warning drive + repeat-offender monitoring
+34,"12.974,77.546",12.974351490159902,77.545854200492,Vijayanagara,BTP020 - Hosahalli Metro Station,Medium,55.75,"05:00, 04:00, 09:00",Warning drive + repeat-offender monitoring
+35,"12.98,77.575",12.980005151113263,77.57488847192643,Upparpet,BTP057 - Anand Rao Junction,Medium,55.66,"09:00, 02:00, 03:00",Warning drive + repeat-offender monitoring
+36,"12.977,77.571",12.97724528635458,77.57075488555778,Chamarajpet,BTP048 - Shanthala Junction,Medium,55.63,"07:00, 08:00, 02:00",Warning drive + repeat-offender monitoring
+37,"12.978,77.575",12.977949901159421,77.57537562202899,Upparpet,BTP045 - Danvanthri Road Junction,Medium,55.38,"10:00, 09:00, 11:00",Warning drive + repeat-offender monitoring
+38,"13.071,77.588",13.071189507711754,77.58803781578963,Kodigehalli,No Junction,Medium,55.23,"11:00, 12:00, 10:00",Warning drive + repeat-offender monitoring
+39,"12.964,77.584",12.964137505263158,77.58395573222342,Halasuru Gate,"BTP080 - NR Road, SP Road Junction",Medium,55.23,"10:00, 06:00, 05:00",Warning drive + repeat-offender monitoring
+40,"12.999,77.549",12.999164215741674,77.54889431291625,Rajajinagar,BTP027 - Modi Bridge Junction,Medium,55.12,"07:00, 03:00, 10:00",Warning drive + repeat-offender monitoring

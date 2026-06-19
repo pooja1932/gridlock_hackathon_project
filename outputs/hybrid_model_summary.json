@@ -1,0 +1,32 @@
+{
+  "model": "hybrid learned ranking model",
+  "features": [
+    "history",
+    "last_month",
+    "trend",
+    "station",
+    "peak_junction"
+  ],
+  "best_weights": {
+    "history": 0.7,
+    "last_month": 0.3,
+    "trend": 0.0,
+    "station": 0.0,
+    "peak_junction": 0.0
+  },
+  "backtest_windows": 5,
+  "metrics_mean": {
+    "precision_at_20": 0.57,
+    "precision_at_50": 0.684,
+    "precision_at_100": 0.696,
+    "ndcg_at_20": 0.9302,
+    "ndcg_at_50": 0.9364,
+    "ndcg_at_100": 0.9335,
+    "spearman_score_correlation": 0.7723
+  },
+  "outputs": [
+    "model_weight_search_top30.csv",
+    "hybrid_model_backtest.csv",
+    "hybrid_model_ranked_hotspots.csv"
+  ]
+}
