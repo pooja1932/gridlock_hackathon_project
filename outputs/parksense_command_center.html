@@ -430,8 +430,8 @@
               <div class="hud-card">
                 <div class="hud-title">Impact Threat Bands</div>
                 <div class="hud-legend">
-                  <div class="legend-item"><span class="legend-dot" style="background:var(--accent-red); box-shadow: 0 0 4px var(--accent-red);"></span><span>Critical (Score > 60)</span></div>
-                  <div class="legend-item"><span class="legend-dot" style="background:var(--accent-amber); box-shadow: 0 0 4px var(--accent-amber);"></span><span>High (Score 35 - 60)</span></div>
+                  <div class="legend-item"><span class="legend-dot" style="background:var(--accent-red); box-shadow: 0 0 4px var(--accent-red);"></span><span>Critical</span></div>
+                  <div class="legend-item"><span class="legend-dot" style="background:var(--accent-amber); box-shadow: 0 0 4px var(--accent-amber);"></span><span>High</span></div>
                   <div class="legend-item"><span class="legend-dot" style="background:var(--accent-green); box-shadow: 0 0 4px var(--accent-green);"></span><span>Medium</span></div>
                 </div>
               </div>
@@ -616,7 +616,7 @@
         attributionControl: false
       });
 
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      L.tileLayer('https://apis.mappls.com/advancedmaps/v1/1e7534b6bd2475e77f31a57205f8e65b/retina_map/{z}/{x}/{y}.png', {
         maxZoom: 20
       }).addTo(map);
 
@@ -645,10 +645,10 @@
         let circleColor = "var(--accent-cyan)";
         
         // Match the dot and circle colors to the risk band
-        if (score > 60 || j.risk_band === "Critical") {
+        if (j.risk_band === "Critical") {
           catClass = "crit-marker";
           circleColor = "#ff3b3b";
-        } else if (score >= 35 || j.risk_band === "High") {
+        } else if (j.risk_band === "High") {
           catClass = "high-marker";
           circleColor = "#ff9d00";
         } else if (j.risk_band === "Medium") {
@@ -857,10 +857,47 @@
 
     // Render Data Tables matching the photo exactly (wrapped in container, styled <th>/<td>)
     function renderTable(id, cols, data, limit) {
-      const table = document.getElementById(id);
-      table.innerHTML = `<thead><tr>${cols.map(c => `<th>${c.label}</th>`).join('')}</tr></thead><tbody>` +
-        data.slice(0, limit).map(r => `<tr>${cols.map(c => `<td>${c.html ? c.html(r) : r[c.key]}</td>`).join('')}</tr>`).join('') +
-        '</tbody>';
+      const container = document.getElementById(id);
+      
+      if(container.tagName.toLowerCase() === 'table') {
+        const parent = container.parentElement;
+        parent.classList.remove('table-container');
+        parent.id = id;
+        parent.classList.add('outcomes-grid');
+        parent.style.gridTemplateColumns = 'repeat(auto-fit, minmax(360px, 1fr))';
+        parent.style.gap = '24px';
+        parent.innerHTML = '';
+        return renderTable(id, cols, data, limit);
+      }
+      
+      container.innerHTML = data.slice(0, limit).map(r => {
+        let badge = cols[0];
+        let primary = cols.length > 1 ? cols[1] : cols[0];
+
+        let html = '<div class="outcome-card" style="padding: 24px; min-height: 160px; display: flex; flex-direction: column; justify-content: center;">';
+        
+        // Top row
+        html += '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">';
+        html += '<div style="flex: 1; padding-right: 12px;">';
+        html += '<div class="outcome-title" style="margin-bottom: 8px; font-size: 11.5px;">' + primary.label + '</div>';
+        html += '<div class="outcome-value" style="font-size: 18px; line-height: 1.4;">' + (primary.html ? primary.html(r) : r[primary.key]) + '</div>';
+        html += '</div>';
+        html += '<div style="transform: scale(1.15); transform-origin: top right;">' + (badge.html ? badge.html(r) : r[badge.key]) + '</div>';
+        html += '</div>';
+        
+        // Other columns
+        cols.forEach((c) => {
+           if (c !== primary && c !== badge) {
+              html += '<div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px; margin-top: 12px;">';
+              html += '<span class="outcome-sub" style="margin: 0; font-size: 11.5px;">' + c.label + '</span>';
+              html += '<span style="font-size: 14px; color: #fff; font-weight: 500;">' + (c.html ? c.html(r) : r[c.key]) + '</span>';
+              html += '</div>';
+           }
+        });
+        
+        html += '</div>';
+        return html;
+      }).join('');
     }
 
     function rowBand(band) {
@@ -903,41 +940,41 @@
         { label: 'Zone', html: r => `<strong style="font-size:13px">${r.junction_name}</strong><br><span style="color:var(--text-muted); font-size:10px">${r.police_station}</span>` },
         { label: 'Count', html: r => `<span style="font-family:'Share Tech Mono'">${parseInt(r.violation_count).toLocaleString()}</span>` },
         { label: 'Risk', html: r => rowBand(r.risk_band) }
-      ], hotspots, 8);
+      ], hotspots, 48);
       
       renderTable('station-table', [
         { label: 'Station', html: r => `<strong style="font-size:13px">${r.police_station}</strong>` },
         { label: 'Violations', html: r => `<span style="font-family:'Share Tech Mono'">${parseInt(r.violation_count).toLocaleString()}</span>` },
         { label: 'High Zones', html: r => `<span style="font-family:'Share Tech Mono'">${r.high_priority_hotspots}</span>` },
         { label: 'Score', html: r => `<span style="font-family:'Share Tech Mono'; color:var(--accent-cyan)">${Number(r.station_priority_score).toFixed(2)}</span>` }
-      ], stations, 6);
+      ], stations, 24);
 
       renderTable('shift-table', [
         { label: 'Rank', html: r => `<span style="font-family:'Share Tech Mono'; color:var(--accent-cyan)">#${r.priority_rank}</span>` },
         { label: 'Zone', html: r => `<strong style="font-size:13px">${r.junction_name}</strong>` },
         { label: 'Target Hours', html: r => `<span style="font-family:'Share Tech Mono'">${r.best_enforcement_hours}</span>` }
-      ], shifts, 6);
+      ], shifts, 48);
 
       renderTable('record-table', [
         { label: 'Record', html: r => `<span style="font-family:'Share Tech Mono'">HP-${String(r.priority_rank).padStart(4, '0')}</span>` },
         { label: 'Zone', html: r => `<strong>${r.junction_name}</strong>` },
         { label: 'Risk', html: r => rowBand(r.risk_band) },
         { label: 'Score', html: r => `<span style="font-family:'Share Tech Mono'">${Number(r.congestion_impact_score).toFixed(2)}</span>` }
-      ], hotspots, 6);
+      ], hotspots, 48);
 
       renderTable('model-table', [
         { label: 'Rank', html: r => `<span style="font-family:'Share Tech Mono'; color:var(--accent-cyan)">#${r.model_rank}</span>` },
         { label: 'Zone', html: r => `<strong>${r.junction_name}</strong>` },
         { label: 'Model Score', html: r => `<span style="font-family:'Share Tech Mono'">${Number(r.model_priority_score).toFixed(2)}</span>` },
         { label: 'History', html: r => `<span style="font-family:'Share Tech Mono'">${Number(r.history).toFixed(2)}</span>` }
-      ], modelRows, 6);
+      ], modelRows, 48);
 
       renderTable('backtest-table', [
         { label: 'Test Month', html: r => `<span style="font-family:'Share Tech Mono'">${r.test_month}</span>` },
         { label: 'P@20', html: r => `<span style="font-family:'Share Tech Mono'">${(100 * Number(r.precision_at_20)).toFixed(1)}%</span>` },
         { label: 'NDCG@50', html: r => `<span style="font-family:'Share Tech Mono'">${(100 * Number(r.ndcg_at_50)).toFixed(1)}%</span>` },
         { label: 'Spearman', html: r => `<span style="font-family:'Share Tech Mono'; color:var(--accent-cyan)">${Number(r.spearman_score_correlation).toFixed(3)}</span>` }
-      ], backtestRows, 6);
+      ], backtestRows, 24);
 
       renderBars();
     };
