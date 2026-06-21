@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ParkSense AI Command Center</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Exact Match to Friend's Theme & Colors */
+    :root {
+      --bg-dark: #06070a;
+      --bg-sidebar: #090a10;
+      --bg-panel: rgba(12, 15, 26, 0.85);
+      --bg-card: rgba(22, 28, 48, 0.45);
+      --bg-card-hover: rgba(30, 39, 66, 0.6);
+
+      --accent-cyan: #00f0ff;
+      --accent-cyan-rgb: 0, 240, 255;
+      --accent-amber: #ff9d00;
+      --accent-amber-rgb: 255, 157, 0;
+      --accent-red: #ff3b3b;
+      --accent-red-rgb: 255, 59, 59;
+      --accent-green: #00e676;
+      --accent-green-rgb: 0, 230, 118;
+
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #f1f3f9;
+      --text-muted: #8490b1;
+      --bg-gradient-end: #0a0d16;
+      --glow-1: rgba(0, 240, 255, 0.04);
+      --glow-2: rgba(255, 59, 59, 0.03);
+      --bg-header: rgba(8, 10, 18, 0.95);
+      --bg-overlay: rgba(10, 12, 22, 0.92);
+      --bg-overlay-strong: rgba(10, 12, 22, 0.95);
+    }
+
+    /* Light Mode Palette */
+    html[data-theme="light"] {
+      --bg-dark: #f4f6fb;
+      --bg-sidebar: #ffffff;
+      --bg-panel: rgba(255, 255, 255, 0.9);
+      --bg-card: rgba(255, 255, 255, 0.7);
+      --bg-card-hover: rgba(237, 241, 250, 0.95);
+
+      --accent-cyan: #0088a8;
+      --accent-cyan-rgb: 0, 136, 168;
+      --accent-amber: #c97000;
+      --accent-amber-rgb: 201, 112, 0;
+      --accent-red: #d92b2b;
+      --accent-red-rgb: 217, 43, 43;
+      --accent-green: #00945a;
+      --accent-green-rgb: 0, 148, 90;
+
+      --border-color: rgba(15, 23, 42, 0.1);
+      --text-main: #14171f;
+      --text-muted: #5b6478;
+      --bg-gradient-end: #eef1f8;
+      --glow-1: rgba(0, 136, 168, 0.05);
+      --glow-2: rgba(217, 43, 43, 0.04);
+      --bg-header: rgba(255, 255, 255, 0.95);
+      --bg-overlay: rgba(255, 255, 255, 0.92);
+      --bg-overlay-strong: rgba(255, 255, 255, 0.95);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 240, 255, 0.2) var(--bg-dark);
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.25); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan); }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-dark);
+      background-image:
+        radial-gradient(circle at 10% 20%, var(--glow-1) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, var(--glow-2) 0%, transparent 40%),
+        linear-gradient(180deg, var(--bg-dark) 0%, var(--bg-gradient-end) 100%);
+      color: var(--text-main);
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Navigation Sidebar */
+    .nav-sidebar {
+      width: 80px;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 0;
+      gap: 20px;
+      z-index: 1000;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.4);
+      overflow-y: auto;
+    }
+    .nav-logo {
+      color: var(--accent-cyan);
+      filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.5));
+      animation: pulse-glow 2s infinite alternate;
+      margin-bottom: 12px;
+    }
+    .nav-items { display: flex; flex-direction: column; width: 100%; gap: 12px; }
+    .nav-item {
+      background: none; border: none; color: var(--text-muted);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 6px; cursor: pointer; width: 100%; padding: 12px 4px;
+      transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+      position: relative;
+    }
+    .nav-item i { width: 22px; height: 22px; stroke-width: 1.75; }
+    .nav-item span { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center;}
+    .nav-item:hover, .nav-item.active { color: var(--accent-cyan); background: rgba(0, 240, 255, 0.03); }
+    .nav-item.active::after {
+      content: ''; position: absolute; right: 0; top: 15%; height: 70%; width: 3px;
+      background: var(--accent-cyan); box-shadow: 0 0 8px var(--accent-cyan); border-radius: 3px 0 0 3px;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; position: relative;
+    }
+
+    /* Header */
+    header {
+      height: 60px; background: var(--bg-header); border-bottom: 1px solid var(--border-color);
+      display: flex; justify-content: space-between; align-items: center; padding: 0 24px;
+      z-index: 900; box-shadow: 0 4px 16px rgba(0,0,0,0.3); transition: background-color 0.3s ease;
+    }
+    .logo-text {
+      font-size: 20px; font-weight: 800; letter-spacing: 0.5px;
+      background: linear-gradient(90deg, #ffffff, var(--accent-cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: flex; align-items: center; gap: 8px;
+    }
+    .logo-badge {
+      font-family: 'Share Tech Mono', monospace; font-size: 9px; background: rgba(0, 240, 255, 0.12);
+      color: var(--accent-cyan); border: 1px solid rgba(0, 240, 255, 0.25); padding: 2px 6px; border-radius: 4px;
+      -webkit-text-fill-color: var(--accent-cyan);
+    }
+    .quick-stats-bar { display: flex; gap: 28px; }
+    .header-right-group { display: flex; align-items: center; gap: 24px; }
+    .theme-toggle-btn {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-muted);
+      width: 34px; height: 34px; border-radius: 8px; cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; position: relative;
+      transition: all 0.2s ease;
+    }
+    .theme-toggle-btn:hover { color: var(--accent-cyan); border-color: rgba(var(--accent-cyan-rgb), 0.3); background: rgba(0, 240, 255, 0.06); }
+    .theme-toggle-btn i { position: absolute; width: 17px; height: 17px; transition: opacity 0.2s ease, transform 0.3s ease; }
+    .theme-toggle-btn i[data-lucide="sun"] { opacity: 0; transform: rotate(-90deg) scale(0.5); }
+    .theme-toggle-btn i[data-lucide="moon"] { opacity: 1; transform: rotate(0) scale(1); }
+    [data-theme="light"] .theme-toggle-btn i[data-lucide="sun"] { opacity: 1; transform: rotate(0) scale(1); }
+    [data-theme="light"] .theme-toggle-btn i[data-lucide="moon"] { opacity: 0; transform: rotate(90deg) scale(0.5); }
+    .header-stat { display: flex; flex-direction: column; align-items: flex-end; }
+    .header-stat-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); }
+    .header-stat-value { font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: 700; color: var(--accent-cyan); }
+
+    /* View Panes Container */
+    .view-container { flex: 1; position: relative; height: calc(100vh - 60px); width: 100%; overflow: hidden; }
+    .view-pane {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      opacity: 0; pointer-events: none; transform: translateY(12px);
+      transition: opacity 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      overflow-y: auto; overflow-x: hidden;
+    }
+    .view-pane.active-view { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+    /* Layout Grids - 3 Columns for Dashboard */
+    .grid-command { display: grid; grid-template-columns: 320px 1fr 340px; height: 100%; }
+    .grid-standard { display: grid; grid-template-columns: 1fr 1fr; padding: 24px; gap: 24px; }
+    .grid-wide { display: grid; grid-template-columns: 1fr; padding: 24px; gap: 24px; }
+
+    /* Glass Panels & Cards */
+    .panel {
+      background: var(--bg-panel); backdrop-filter: blur(16px);
+      display: flex; flex-direction: column; overflow-y: auto; padding: 20px; gap: 20px; height: 100%;
+    }
+    .panel-left { border-right: 1px solid var(--border-color); }
+    .panel-right {
+      border-left: 1px solid var(--border-color);
+      transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), padding 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.25s ease;
+      position: relative;
+    }
+
+    /* Selected Hotspot collapse behavior */
+    .panel-right .section-title { justify-content: space-between; }
+    .panel-right-collapse-btn {
+      background: none; border: 1px solid var(--border-color); color: var(--text-muted);
+      width: 22px; height: 22px; border-radius: 5px; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s ease;
+    }
+    .panel-right-collapse-btn:hover { color: var(--accent-cyan); border-color: rgba(var(--accent-cyan-rgb), 0.3); background: rgba(0, 240, 255, 0.05); }
+    .panel-right-collapse-btn i { width: 14px; height: 14px; transition: transform 0.3s ease; }
+
+    .grid-command.right-collapsed { grid-template-columns: 320px 1fr 56px; }
+    .grid-command.right-collapsed .panel-right { padding: 20px 8px; align-items: center; }
+    .grid-command.right-collapsed .panel-right .section-title span,
+    .grid-command.right-collapsed #detailsContainer { opacity: 0; pointer-events: none; position: absolute; }
+    .grid-command.right-collapsed .panel-right-collapse-btn i { transform: rotate(180deg); }
+    .grid-command.right-collapsed .section-title { border-bottom: none; padding-bottom: 0; justify-content: center; }
+    .grid-command.right-collapsed #rightPanelIcon { display: none; }
+
+    .glass-card {
+      background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px;
+      padding: 20px; transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1); position: relative;
+      display: flex; flex-direction: column; gap: 12px; overflow: hidden;
+    }
+    .glass-card:hover {
+      background: var(--bg-card-hover); border-color: rgba(var(--accent-cyan-rgb), 0.2);
+      box-shadow: 0 8px 24px rgba(0, 240, 255, 0.05); transform: translateY(-2px);
+    }
+    .section-title {
+      font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px;
+      color: var(--text-main); display: flex; align-items: center; gap: 8px; margin-bottom: 2px;
+      border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;
+    }
+    .section-title i { color: var(--accent-cyan); width: 18px; height: 18px; }
+
+    /* Filter Pills */
+    .filter-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill-btn {
+      background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color);
+      color: var(--text-muted); padding: 6px 14px; border-radius: 16px; font-family: inherit;
+      font-size: 10.5px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;
+    }
+    .pill-btn:hover { background: rgba(255, 255, 255, 0.06); color: var(--text-main); border-color: rgba(var(--accent-cyan-rgb), 0.3); }
+    .pill-btn.active {
+      background: rgba(var(--accent-cyan-rgb), 0.12); color: var(--accent-cyan);
+      border-color: var(--accent-cyan); box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
+    }
+
+    /* Hotspot List */
+    .hotspot-list { display: flex; flex-direction: column; gap: 8px; flex: 1; overflow-y: auto; padding-right: 4px; }
+    .hotspot-item {
+      display: flex; justify-content: space-between; align-items: center; padding: 12px 14px;
+      background: rgba(255,255,255,0.015); border-radius: 8px; border: 1px solid var(--border-color);
+      cursor: pointer; transition: all 0.2s ease;
+    }
+    .hotspot-item:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); }
+    .hotspot-item.active {
+      background: rgba(var(--accent-cyan-rgb), 0.06); border-color: rgba(var(--accent-cyan-rgb), 0.25);
+      box-shadow: inset 0 0 6px rgba(0, 240, 255, 0.03);
+    }
+    .hotspot-item.active .hotspot-name { color: var(--accent-cyan); }
+    .hotspot-info { display: flex; flex-direction: column; gap: 2px; }
+    .hotspot-name { font-size: 13px; font-weight: 700; color: var(--text-main); transition: color 0.2s ease; }
+    .hotspot-sub { font-size: 10px; color: var(--text-muted); }
+
+    /* Selected Details (Right Side) */
+    .selected-details { display: flex; flex-direction: column; gap: 12px; animation: fadeIn 0.3s ease; }
+    .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .detail-cell { background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 6px; }
+    .detail-label { font-size: 9.5px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
+    .detail-value { font-size: 14px; font-weight: 700; margin-top: 2px; color: var(--text-main);}
+    .detail-value.mono { font-family: 'Share Tech Mono', monospace; }
+
+    .strategy-alert {
+      background: rgba(0, 240, 255, 0.04); border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 8px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; margin-top: 4px;
+    }
+    .strategy-alert i { color: var(--accent-cyan); flex-shrink: 0; width: 18px; height: 18px; }
+    .strategy-text { font-size: 11px; line-height: 1.45; font-weight: 500; }
+
+    /* Real Map Layout & Popups */
+    .map-panel { position: relative; width: 100%; height: 100%; }
+    #map { width: 100%; height: 100%; background: var(--bg-sidebar); position: absolute; top: 0; left: 0; z-index: 1; transition: background-color 0.3s ease;}
+
+    /* Dark-mode tile treatment: Mappls only ships a light raster style,
+       so dark mode is achieved by filtering the tile layer to a navy/teal palette. */
+    #map .leaflet-tile-pane {
+      transition: filter 0.3s ease;
+    }
+    html[data-theme="dark"] #map .leaflet-tile-pane {
+      filter: invert(1) hue-rotate(195deg) saturate(0.6) brightness(0.92) contrast(0.95);
+    }
+
+    /* Leaflet Popup Theme-Aware Customization */
+    .leaflet-popup-content-wrapper {
+      background: var(--bg-overlay-strong); backdrop-filter: blur(12px); border: 1px solid var(--border-color);
+      color: var(--text-main); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.5); padding: 0;
+      transition: background-color 0.3s ease;
+    }
+    .leaflet-popup-content { margin: 12px 14px; line-height: 1.4; }
+    .leaflet-popup-tip { background: var(--bg-overlay-strong); border: 1px solid var(--border-color); }
+    .leaflet-container a.leaflet-popup-close-button { color: var(--text-muted); padding: 4px; }
+    .leaflet-container a.leaflet-popup-close-button:hover { color: var(--text-main); }
+
+    .map-hud { position: absolute; bottom: 20px; left: 20px; z-index: 1000; pointer-events: none; }
+    .hud-card {
+      pointer-events: auto; background: var(--bg-overlay); backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color); padding: 12px 16px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+      transition: background-color 0.3s ease;
+    }
+    .hud-title { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 6px; }
+    .hud-legend { display: flex; flex-direction: column; gap: 6px; }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* Map Navigation Overlay / Controls */
+    .map-controls-overlay {
+      position: absolute; top: 20px; right: 20px; z-index: 1000;
+      display: flex; gap: 8px; background: var(--bg-overlay); backdrop-filter: blur(12px);
+      padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      transition: background-color 0.3s ease;
+    }
+    .map-btn {
+      background: transparent; border: 1px solid transparent; color: var(--text-muted);
+      padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;
+      display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;
+    }
+    .map-btn:hover { background: rgba(255,255,255,0.05); color: var(--text-main); }
+    .map-btn.active { background: rgba(0, 240, 255, 0.1); color: var(--accent-cyan); border: 1px solid rgba(0, 240, 255, 0.25); }
+
+    /* Custom Leaflet Pulsing Markers */
+    .pulsing-gps-marker { position: relative; display: flex; justify-content: center; align-items: center; }
+    .marker-dot { width: 10px; height: 10px; border-radius: 50%; z-index: 5; }
+    .marker-ring {
+      position: absolute; width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid;
+      opacity: 0; animation: gps-pulse 1.8s cubic-bezier(0.24, 0, 0.38, 1) infinite; z-index: 1;
+    }
+    .marker-ring-secondary {
+      position: absolute; width: 24px; height: 24px; border-radius: 50%; border: 1px solid;
+      opacity: 0; animation: gps-pulse 1.8s cubic-bezier(0.24, 0, 0.38, 1) infinite; animation-delay: 0.6s; z-index: 1;
+    }
+    @keyframes gps-pulse { 0% { transform: scale(0.6); opacity: 0; } 30% { opacity: 0.8; } 100% { transform: scale(2.0); opacity: 0; } }
+
+    /* Marker Colors */
+    .crit-marker .marker-dot { background-color: var(--accent-red); box-shadow: 0 0 8px var(--accent-red); }
+    .crit-marker .marker-ring, .crit-marker .marker-ring-secondary { border-color: var(--accent-red); }
+    .high-marker .marker-dot { background-color: var(--accent-amber); box-shadow: 0 0 8px var(--accent-amber); }
+    .high-marker .marker-ring, .high-marker .marker-ring-secondary { border-color: var(--accent-amber); }
+    .med-marker .marker-dot { background-color: var(--accent-green); box-shadow: 0 0 8px var(--accent-green); }
+    .med-marker .marker-ring, .med-marker .marker-ring-secondary { border-color: var(--accent-green); }
+
+    /* Other Views & Table Styling to exactly match photo */
+    .outcomes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .outcome-card {
+      background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.03);
+      padding: 14px; border-radius: 10px; display: flex; flex-direction: column; position: relative;
+    }
+    .outcome-card i { position: absolute; top: 14px; right: 14px; color: var(--accent-cyan); opacity: 0.6; width: 18px;}
+    .outcome-title { font-size: 9.5px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.8px; margin-bottom: 6px; }
+    .outcome-value { font-family: 'Share Tech Mono', monospace; font-size: 17px; font-weight: 800; color: var(--text-main); }
+    .outcome-sub { font-size: 9.5px; color: var(--text-muted); margin-top: 4px; line-height: 1.35;}
+
+    .table-container { width: 100%; overflow-x: auto; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted);
+      padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); font-weight: 700;
+      background: rgba(0,0,0,0.2);
+    }
+    td { font-size: 12.5px; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text-main); vertical-align: middle;}
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .score-badge {
+      font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: 700;
+      padding: 4px 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.04); display: inline-block;
+    }
+    .score-critical { color: var(--accent-red); background: rgba(255, 59, 59, 0.08); border: 1px solid rgba(255, 59, 59, 0.15); }
+    .score-high { color: var(--accent-amber); background: rgba(255, 157, 0, 0.08); border: 1px solid rgba(255, 157, 0, 0.15); }
+    .score-medium { color: var(--accent-green); background: rgba(0, 230, 118, 0.08); border: 1px solid rgba(0, 230, 118, 0.15); }
+
+    .efficiency-comparison { display: flex; flex-direction: column; gap: 12px; margin: 10px 0; }
+    .efficiency-bar-group { display: flex; flex-direction: column; gap: 6px; }
+    .efficiency-bar-info { display: flex; justify-content: space-between; font-size: 11.5px; font-weight: 600; }
+    .efficiency-bar-label { color: var(--text-muted); }
+    .efficiency-bar-val { font-family: 'Share Tech Mono', monospace; color: var(--text-main);}
+    .efficiency-bar-outer { width: 100%; height: 8px; background: rgba(255,255,255,0.03); border-radius: 4px; overflow: hidden; }
+    .efficiency-bar-inner { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
+
+    @keyframes pulse-glow {
+      0% { filter: drop-shadow(0 0 3px rgba(0, 240, 255, 0.3)); }
+      100% { filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.6)); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 1200px) {
+      .grid-command { grid-template-columns: 300px 1fr; } /* Drop 3rd col on medium screens */
+      .panel-right { position: absolute; right: -400px; } /* Hide right panel */
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav-sidebar">
+    <div class="nav-logo">
+      <i data-lucide="shield-alert" style="width: 26px; height: 26px;"></i>
+    </div>
+    <div class="nav-items">
+      <button class="nav-item active" data-target="view-dashboard">
+        <i data-lucide="map"></i>
+        <span>Command</span>
+      </button>
+      <button class="nav-item" data-target="view-hotspots">
+        <i data-lucide="target"></i>
+        <span>Hotspots</span>
+      </button>
+      <button class="nav-item" data-target="view-stations">
+        <i data-lucide="building"></i>
+        <span>Stations</span>
+      </button>
+      <button class="nav-item" data-target="view-peaks">
+        <i data-lucide="clock"></i>
+        <span>Peaks</span>
+      </button>
+      <button class="nav-item" data-target="view-records">
+        <i data-lucide="database"></i>
+        <span>Records</span>
+      </button>
+      <button class="nav-item" data-target="view-model">
+        <i data-lucide="activity"></i>
+        <span>Model</span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="main-content">
+
+    <header>
+      <div class="logo-container">
+        <div class="logo-text">
+          PARKSENSE AI <span class="logo-badge">PROTOTYPE</span>
+        </div>
+      </div>
+      <div class="header-right-group">
+        <div class="quick-stats-bar">
+          <div class="header-stat">
+            <span class="header-stat-label">Records Used</span>
+            <span class="header-stat-value">298,445</span>
+          </div>
+          <div class="header-stat">
+            <span class="header-stat-label">Spatial Hotspots</span>
+            <span class="header-stat-value">7,814</span>
+          </div>
+          <div class="header-stat">
+            <span class="header-stat-label">High/Critical</span>
+            <span class="header-stat-value">12 Zones</span>
+          </div>
+          <div class="header-stat">
+            <span class="header-stat-label">Dataset Window</span>
+            <span class="header-stat-value">Nov '23 - Apr '24</span>
+          </div>
+        </div>
+        <button class="theme-toggle-btn" id="themeToggle" title="Toggle light / dark mode">
+          <i data-lucide="sun"></i>
+          <i data-lucide="moon"></i>
+        </button>
+      </div>
+    </header>
+
+    <div class="view-container">
+
+      <div id="view-dashboard" class="view-pane active-view">
+        <div class="grid-command" id="commandGrid">
+
+          <div class="panel panel-left">
+            <div>
+              <div class="section-title">
+                <i data-lucide="map-pin"></i> Jurisdictions
+              </div>
+              <div class="filter-pills" id="stationFilters" style="margin-top: 8px;">
+                <button class="pill-btn active" data-station="All">All stations</button>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
+              <div class="section-title">
+                <i data-lucide="list"></i> Priority List
+              </div>
+              <div class="hotspot-list" id="hotspotList" style="margin-top: 8px;">
+                </div>
+            </div>
+          </div>
+
+          <div class="map-panel">
+            <div id="map"></div>
+
+            <div class="map-controls-overlay">
+              <button class="map-btn active" id="filter-all" onclick="setBandFilter('All')">
+                <i data-lucide="layers"></i> All Risk Bands
+              </button>
+              <div style="width: 1px; background: rgba(255,255,255,0.1); margin: 0 4px;"></div>
+              <button class="map-btn" id="filter-crit" onclick="setBandFilter('Critical')">
+                <span class="legend-dot" style="background:var(--accent-red); box-shadow: 0 0 4px var(--accent-red);"></span> Critical
+              </button>
+              <button class="map-btn" id="filter-high" onclick="setBandFilter('High')">
+                <span class="legend-dot" style="background:var(--accent-amber); box-shadow: 0 0 4px var(--accent-amber);"></span> High
+              </button>
+              <div style="width: 1px; background: rgba(255,255,255,0.1); margin: 0 4px;"></div>
+              <button class="map-btn" id="recenterMap">
+                <i data-lucide="maximize-2"></i> Recenter
+              </button>
+            </div>
+
+            <div class="map-hud">
+              <div class="hud-card">
+                <div class="hud-title">Impact Threat Bands</div>
+                <div class="hud-legend">
+                  <div class="legend-item"><span class="legend-dot" style="background:var(--accent-red); box-shadow: 0 0 4px var(--accent-red);"></span><span>Critical</span></div>
+                  <div class="legend-item"><span class="legend-dot" style="background:var(--accent-amber); box-shadow: 0 0 4px var(--accent-amber);"></span><span>High</span></div>
+                  <div class="legend-item"><span class="legend-dot" style="background:var(--accent-green); box-shadow: 0 0 4px var(--accent-green);"></span><span>Medium</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel panel-right" id="rightPanel">
+            <div class="section-title">
+              <i data-lucide="info" id="rightPanelIcon"></i> <span>Selected Hotspot</span>
+              <button class="panel-right-collapse-btn" id="rightPanelToggle" title="Collapse panel">
+                <i data-lucide="chevron-right"></i>
+              </button>
+            </div>
+            <div id="detailsContainer" style="display: flex; flex-direction: column; gap: 16px;">
+              </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div id="view-hotspots" class="view-pane">
+        <div class="grid-wide">
+          <div class="glass-card" style="padding:0; border:none; background:transparent;">
+            <div class="section-title"><i data-lucide="list"></i> Top Ranked Hotspots</div>
+            <div class="table-container"><table id="hotspot-table"></table></div>
+          </div>
+          <div class="glass-card" style="padding:0; border:none; background:transparent;">
+            <div class="section-title"><i data-lucide="calendar"></i> Enforcement Shift Plan</div>
+            <div class="table-container"><table id="shift-table"></table></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-stations" class="view-pane">
+        <div class="grid-standard">
+          <div class="glass-card" style="padding:0; border:none; background:transparent;">
+            <div class="section-title"><i data-lucide="building"></i> Station Priority Queue</div>
+            <div class="table-container"><table id="station-table"></table></div>
+          </div>
+          <div class="glass-card">
+            <div class="section-title"><i data-lucide="alert-circle"></i> Operational Summaries</div>
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+              <div class="strategy-alert" style="flex-direction: column; gap: 4px;">
+                <div style="color: var(--accent-cyan); font-weight: 700; font-size: 13px;">Upparpet</div>
+                <div class="strategy-text" style="color: var(--text-muted);">Highest total parking impact and the largest count of high-priority hotspots. Start with market and theatre-adjacent junctions.</div>
+              </div>
+              <div class="strategy-alert" style="flex-direction: column; gap: 4px;">
+                <div style="color: var(--accent-amber); font-weight: 700; font-size: 13px;">Shivajinagar</div>
+                <div class="strategy-text" style="color: var(--text-muted);">Critical hotspot around Safina Plaza and strong peak-hour concentration. Needs tow-away readiness during demand windows.</div>
+              </div>
+              <div class="strategy-alert" style="flex-direction: column; gap: 4px;">
+                <div style="color: var(--accent-green); font-weight: 700; font-size: 13px;">City Market</div>
+                <div class="strategy-text" style="color: var(--text-muted);">High junction sensitivity near KR Market. Focus patrol timing around loading, shopping, and peak movement periods.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-peaks" class="view-pane">
+        <div class="grid-standard">
+          <div class="glass-card">
+            <div class="section-title"><i data-lucide="bar-chart-2"></i> Peak-Hour Impact Profile</div>
+            <div class="efficiency-comparison" id="hour-bars"></div>
+          </div>
+          <div class="glass-card">
+            <div class="section-title"><i data-lucide="settings"></i> Shift Planning Rules</div>
+            <div class="detail-grid" style="margin-top: 10px;">
+              <div class="detail-cell">
+                <div class="detail-label">Morning Peak</div>
+                <div class="detail-value mono" style="color: var(--accent-amber);">08:00-10:00</div>
+              </div>
+              <div class="detail-cell">
+                <div class="detail-label">Evening Peak</div>
+                <div class="detail-value mono" style="color: var(--accent-cyan);">17:00-20:00</div>
+              </div>
+            </div>
+            <div class="strategy-alert" style="margin-top: 16px;">
+              <i data-lucide="info"></i>
+              <span class="strategy-text">Hotspots that combine peak-hour concentration with junction sensitivity are escalated above raw-count-only locations.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-records" class="view-pane">
+        <div class="grid-wide">
+          <div class="outcomes-grid">
+            <div class="outcome-card">
+              <i data-lucide="file-text"></i>
+              <div class="outcome-title">hotspot_priority.csv</div>
+              <div class="outcome-sub">Ranked records with score, band, station, junction, and recommended action.</div>
+            </div>
+            <div class="outcome-card">
+              <i data-lucide="file-text"></i>
+              <div class="outcome-title">station_summary.csv</div>
+              <div class="outcome-sub">Station-level deployment priorities and high-priority counts.</div>
+            </div>
+            <div class="outcome-card">
+              <i data-lucide="file-text"></i>
+              <div class="outcome-title">shift_plan.csv</div>
+              <div class="outcome-sub">Top enforcement records with recommended patrol hours.</div>
+            </div>
+          </div>
+          <div class="grid-standard" style="padding: 0; gap: 24px;">
+            <div class="glass-card" style="padding:0; border:none; background:transparent;">
+              <div class="section-title"><i data-lucide="database"></i> Managed Records</div>
+              <div class="table-container"><table id="record-table"></table></div>
+            </div>
+            <div class="glass-card">
+              <div class="section-title"><i data-lucide="lock"></i> Data Governance</div>
+              <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+                <div class="strategy-alert"><i data-lucide="check-circle" style="color:var(--accent-green)"></i><span class="strategy-text">Uses anonymized vehicle identifiers and aggregated spatial bins for dashboard visibility.</span></div>
+                <div class="strategy-alert"><i data-lucide="check-circle" style="color:var(--accent-green)"></i><span class="strategy-text">Keeps raw evidence separate from decision outputs so enforcement officers can review.</span></div>
+                <div class="strategy-alert"><i data-lucide="check-circle" style="color:var(--accent-green)"></i><span class="strategy-text">Exports CSV records that can be searched, audited, and attached to patrol logs.</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-model" class="view-pane">
+        <div class="grid-wide">
+          <div class="outcomes-grid">
+            <div class="outcome-card">
+              <i data-lucide="crosshair"></i>
+              <div class="outcome-title">Precision@50</div>
+              <div class="outcome-value" style="color: var(--accent-cyan);">68.4%</div>
+              <div class="outcome-sub">Predicted hotspots that appeared in actual next month</div>
+            </div>
+            <div class="outcome-card">
+              <i data-lucide="bar-chart"></i>
+              <div class="outcome-title">NDCG Ranking</div>
+              <div class="outcome-value" style="color: var(--accent-cyan);">93.64%</div>
+              <div class="outcome-sub">Rewards placing most important future hotspots near top</div>
+            </div>
+            <div class="outcome-card">
+              <i data-lucide="activity"></i>
+              <div class="outcome-title">Spearman Stability</div>
+              <div class="outcome-value" style="color: var(--accent-cyan);">0.772</div>
+              <div class="outcome-sub">Correlation between historical and future priority</div>
+            </div>
+          </div>
+          <div class="grid-standard" style="padding: 0; gap: 24px;">
+            <div class="glass-card" style="padding:0; border:none; background:transparent;">
+              <div class="section-title"><i data-lucide="git-merge"></i> Hybrid Ranked Hotspots</div>
+              <div class="table-container"><table id="model-table"></table></div>
+            </div>
+            <div class="glass-card" style="padding:0; border:none; background:transparent;">
+              <div class="section-title"><i data-lucide="history"></i> Backtest Validation</div>
+              <div class="table-container"><table id="backtest-table"></table></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <script>
+    // Your Exact Original Data
+    const hotspots = [{"priority_rank": 1, "grid_id": "12.981,77.61", "latitude": 12.981083513578422, "longitude": 77.61013528841559, "police_station": "Shivajinagar", "junction_name": "BTP051 - Safina Plaza Junction", "violation_count": 4411, "unique_vehicles": 3538, "peak_hour_share": 49.3, "junction_share": 100.0, "congestion_impact_score": 75.17, "parking_violation_density_score": 100.0, "parking_violation_frequency_score": 100.0, "repeat_hotspot_density_score": 55.0, "junction_proximity_score": 100.0, "estimated_speed_drop_score": 100.0, "road_occupancy_score": 14.9, "peak_hour_weight_score": 49.3, "road_importance_score": 100.0, "vehicle_blockage_score": 14.9, "risk_band": "Critical", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 2, "grid_id": "12.964,77.577", "latitude": 12.964077901563494, "longitude": 77.5768995240612, "police_station": "City Market", "junction_name": "BTP082 - KR Market Junction", "violation_count": 3745, "unique_vehicles": 3170, "peak_hour_share": 17.4, "junction_share": 100.0, "congestion_impact_score": 68.51, "parking_violation_density_score": 97.9, "parking_violation_frequency_score": 97.9, "repeat_hotspot_density_score": 46.4, "junction_proximity_score": 100.0, "estimated_speed_drop_score": 81.8, "road_occupancy_score": 10.2, "peak_hour_weight_score": 17.4, "road_importance_score": 100.0, "vehicle_blockage_score": 10.2, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 3, "grid_id": "12.977,77.576", "latitude": 12.977186446651997, "longitude": 77.57613171631563, "police_station": "Upparpet", "junction_name": "BTP040 - Elite Junction", "violation_count": 3181, "unique_vehicles": 2563, "peak_hour_share": 41.1, "junction_share": 100.0, "congestion_impact_score": 68.23, "parking_violation_density_score": 95.8, "parking_violation_frequency_score": 95.8, "repeat_hotspot_density_score": 40.0, "junction_proximity_score": 100.0, "estimated_speed_drop_score": 88.4, "road_occupancy_score": 8.3, "peak_hour_weight_score": 41.1, "road_importance_score": 100.0, "vehicle_blockage_score": 8.3, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 4, "grid_id": "12.973,77.579", "latitude": 12.9730881227388, "longitude": 77.579035767836, "police_station": "Upparpet", "junction_name": "BTP044 - Sagar Theatre Junction", "violation_count": 2366, "unique_vehicles": 1586, "peak_hour_share": 42.1, "junction_share": 100.0, "congestion_impact_score": 66.29, "parking_violation_density_score": 91.9, "parking_violation_frequency_score": 91.9, "repeat_hotspot_density_score": 38.3, "junction_proximity_score": 100.0, "estimated_speed_drop_score": 84.6, "road_occupancy_score": 7.4, "peak_hour_weight_score": 42.1, "road_importance_score": 100.0, "vehicle_blockage_score": 7.4, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 5, "grid_id": "12.965,77.576", "latitude": 12.964683566373512, "longitude": 77.57617047206416, "police_station": "City Market", "junction_name": "BTP082 - KR Market Junction", "violation_count": 1933, "unique_vehicles": 1656, "peak_hour_share": 34.3, "junction_share": 100.0, "congestion_impact_score": 62.68, "parking_violation_density_score": 89.3, "parking_violation_frequency_score": 89.3, "repeat_hotspot_density_score": 31.6, "junction_proximity_score": 100.0, "estimated_speed_drop_score": 78.6, "road_occupancy_score": 6.5, "peak_hour_weight_score": 34.3, "road_importance_score": 100.0, "vehicle_blockage_score": 6.5, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 6, "grid_id": "12.982,77.606", "latitude": 12.98203888522829, "longitude": 77.60631703724262, "police_station": "Shivajinagar", "junction_name": "BTP051 - Safina Plaza Junction", "violation_count": 1117, "unique_vehicles": 626, "peak_hour_share": 59.2, "junction_share": 100.0, "congestion_impact_score": 62.66, "parking_violation_density_score": 82.2, "parking_violation_frequency_score": 82.2, "repeat_hotspot_density_score": 33.3, "junction_proximity_score": 100.0, "estimated_speed_drop_score": 79.9, "road_occupancy_score": 5.5, "peak_hour_weight_score": 59.2, "road_importance_score": 100.0, "vehicle_blockage_score": 5.5, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 7, "grid_id": "12.974,77.545", "latitude": 12.974176691506228, "longitude": 77.54500246659116, "police_station": "Vijayanagara", "junction_name": "BTP020 - Hosahalli Metro Station", "violation_count": 1766, "unique_vehicles": 1139, "peak_hour_share": 31.0, "junction_share": 100.0, "congestion_impact_score": 61.93, "parking_violation_density_score": 88.1, "parking_violation_frequency_score": 88.1, "repeat_hotspot_density_score": 32.4, "junction_proximity_score": 100.0, "estimated_speed_drop_score": 75.0, "road_occupancy_score": 4.9, "peak_hour_weight_score": 31.0, "road_importance_score": 100.0, "vehicle_blockage_score": 4.9, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 8, "grid_id": "12.977,77.577", "latitude": 12.977003156528578, "longitude": 77.57706455133717, "police_station": "Upparpet", "junction_name": "BTP040 - Elite Junction", "violation_count": 1907, "unique_vehicles": 1621, "peak_hour_share": 39.6, "junction_share": 100.0, "congestion_impact_score": 61.92, "parking_violation_density_score": 89.1, "parking_violation_frequency_score": 89.1, "repeat_hotspot_density_score": 23.4, "junction_proximity_score": 100.0, "estimated_speed_drop_score": 85.9, "road_occupancy_score": 14.7, "peak_hour_weight_score": 39.6, "road_importance_score": 100.0, "vehicle_blockage_score": 14.7, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 9, "grid_id": "12.976,77.577", "latitude": 12.976102326406686, "longitude": 77.57725434222841, "police_station": "Upparpet", "junction_name": "BTP040 - Elite Junction", "violation_count": 1795, "unique_vehicles": 1463, "peak_hour_share": 42.0, "junction_share": 100.0, "congestion_impact_score": 61.78, "parking_violation_density_score": 88.3, "parking_violation_frequency_score": 88.3, "repeat_hotspot_density_score": 25.9, "junction_proximity_score": 100.0, "estimated_speed_drop_score": 81.6, "road_occupancy_score": 7.7, "peak_hour_weight_score": 42.0, "road_importance_score": 100.0, "vehicle_blockage_score": 7.7, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 10, "grid_id": "12.984,77.603", "latitude": 12.98419388496058, "longitude": 77.60320002601576, "police_station": "Shivajinagar", "junction_name": "BTP211 - Central Street Junction", "violation_count": 1649, "unique_vehicles": 1451, "peak_hour_share": 36.9, "junction_share": 100.0, "congestion_impact_score": 61.33, "parking_violation_density_score": 87.2, "parking_violation_frequency_score": 87.2, "repeat_hotspot_density_score": 25.4, "junction_proximity_score": 100.0, "estimated_speed_drop_score": 82.8, "road_occupancy_score": 14.0, "peak_hour_weight_score": 36.9, "road_importance_score": 100.0, "vehicle_blockage_score": 14.0, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 11, "grid_id": "12.984,77.604", "latitude": 12.984000441963191, "longitude": 77.6036676590184, "police_station": "Shivajinagar", "junction_name": "BTP211 - Central Street Junction", "violation_count": 1630, "unique_vehicles": 1474, "peak_hour_share": 34.2, "junction_share": 100.0, "congestion_impact_score": 60.72, "parking_violation_density_score": 87.1, "parking_violation_frequency_score": 87.1, "repeat_hotspot_density_score": 24.2, "junction_proximity_score": 100.0, "estimated_speed_drop_score": 81.7, "road_occupancy_score": 14.2, "peak_hour_weight_score": 34.2, "road_importance_score": 100.0, "vehicle_blockage_score": 14.2, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 12, "grid_id": "12.934,77.691", "latitude": 12.933868001674734, "longitude": 77.69086837725041, "police_station": "HAL Old Airport", "junction_name": "No Junction", "violation_count": 3343, "unique_vehicles": 1519, "peak_hour_share": 26.7, "junction_share": 0.0, "congestion_impact_score": 60.05, "parking_violation_density_score": 96.4, "parking_violation_frequency_score": 96.4, "repeat_hotspot_density_score": 73.7, "junction_proximity_score": 0.0, "estimated_speed_drop_score": 79.5, "road_occupancy_score": 3.9, "peak_hour_weight_score": 26.7, "road_importance_score": 0.0, "vehicle_blockage_score": 3.9, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 13, "grid_id": "12.982,77.608", "latitude": 12.981729046022728, "longitude": 77.60815689673296, "police_station": "Shivajinagar", "junction_name": "BTP051 - Safina Plaza Junction", "violation_count": 1408, "unique_vehicles": 1168, "peak_hour_share": 49.3, "junction_share": 100.0, "congestion_impact_score": 59.7, "parking_violation_density_score": 85.2, "parking_violation_frequency_score": 85.2, "repeat_hotspot_density_score": 17.8, "junction_proximity_score": 100.0, "estimated_speed_drop_score": 84.7, "road_occupancy_score": 12.4, "peak_hour_weight_score": 49.3, "road_importance_score": 100.0, "vehicle_blockage_score": 12.4, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 14, "grid_id": "12.976,77.578", "latitude": 12.97605577986744, "longitude": 77.5781520706711, "police_station": "Upparpet", "junction_name": "BTP044 - Sagar Theatre Junction", "violation_count": 1207, "unique_vehicles": 999, "peak_hour_share": 48.3, "junction_share": 100.0, "congestion_impact_score": 59.65, "parking_violation_density_score": 83.2, "parking_violation_frequency_score": 83.2, "repeat_hotspot_density_score": 23.0, "junction_proximity_score": 100.0, "estimated_speed_drop_score": 79.3, "road_occupancy_score": 7.9, "peak_hour_weight_score": 48.3, "road_importance_score": 100.0, "vehicle_blockage_score": 7.9, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 15, "grid_id": "12.965,77.539", "latitude": 12.964869075141683, "longitude": 77.5388754314141, "police_station": "Vijayanagara", "junction_name": "BTP016 - 5th Main Road, RPC Layout", "violation_count": 1402, "unique_vehicles": 1314, "peak_hour_share": 16.8, "junction_share": 100.0, "congestion_impact_score": 59.49, "parking_violation_density_score": 85.1, "parking_violation_frequency_score": 85.1, "repeat_hotspot_density_score": 32.2, "junction_proximity_score": 100.0, "estimated_speed_drop_score": 69.3, "road_occupancy_score": 7.2, "peak_hour_weight_score": 16.8, "road_importance_score": 100.0, "vehicle_blockage_score": 7.2, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}];
+    const stations = [{"police_station": "Upparpet", "violation_count": 34468, "high_priority_hotspots": 4, "unique_hotspots": 102, "peak_hour_share": 35.1, "station_priority_score": 93.51}, {"police_station": "Shivajinagar", "violation_count": 28044, "high_priority_hotspots": 4, "unique_hotspots": 144, "peak_hour_share": 43.3, "station_priority_score": 89.85}, {"police_station": "City Market", "violation_count": 17646, "high_priority_hotspots": 2, "unique_hotspots": 132, "peak_hour_share": 28.4, "station_priority_score": 71.3}, {"police_station": "HAL Old Airport", "violation_count": 20819, "high_priority_hotspots": 1, "unique_hotspots": 311, "peak_hour_share": 28.3, "station_priority_score": 69.16}, {"police_station": "Malleshwaram", "violation_count": 22200, "high_priority_hotspots": 0, "unique_hotspots": 220, "peak_hour_share": 39.1, "station_priority_score": 66.15}];
+    const shifts = [{"priority_rank": 1, "police_station": "Shivajinagar", "junction_name": "BTP051 - Safina Plaza Junction", "risk_band": "Critical", "congestion_impact_score": 75.17, "best_enforcement_hours": "10:00, 09:00, 11:00", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 2, "police_station": "City Market", "junction_name": "BTP082 - KR Market Junction", "risk_band": "High", "congestion_impact_score": 68.51, "best_enforcement_hours": "00:00, 01:00, 10:00", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 3, "police_station": "Upparpet", "junction_name": "BTP040 - Elite Junction", "risk_band": "High", "congestion_impact_score": 68.23, "best_enforcement_hours": "09:00, 08:00, 10:00", "recommended_action": "Focused patrol during top 2 peak hours"}];
+    const hourly = [{"hour": 0, "violations": 5815, "impact": 6396.75}, {"hour": 1, "violations": 11098, "impact": 11920.65}, {"hour": 2, "violations": 16261, "impact": 17137.24}, {"hour": 3, "violations": 21565, "impact": 20430.51}, {"hour": 4, "violations": 23512, "impact": 20483.37}, {"hour": 5, "violations": 22193, "impact": 18711.38}, {"hour": 6, "violations": 19836, "impact": 16705.22}, {"hour": 7, "violations": 19445, "impact": 17344.05}, {"hour": 8, "violations": 25790, "impact": 26854.69}, {"hour": 9, "violations": 26994, "impact": 27161.7}, {"hour": 10, "violations": 32580, "impact": 33574.14}, {"hour": 11, "violations": 32176, "impact": 26669.94}, {"hour": 12, "violations": 19689, "impact": 16007.83}, {"hour": 13, "violations": 11546, "impact": 9896.39}, {"hour": 14, "violations": 5634, "impact": 5041.25}, {"hour": 15, "violations": 1224, "impact": 1185.91}, {"hour": 16, "violations": 583, "impact": 566.32}, {"hour": 17, "violations": 377, "impact": 433.51}, {"hour": 18, "violations": 150, "impact": 161.68}, {"hour": 19, "violations": 27, "impact": 35.36}, {"hour": 20, "violations": 42, "impact": 54.36}, {"hour": 21, "violations": 148, "impact": 161.24}, {"hour": 22, "violations": 725, "impact": 759.09}, {"hour": 23, "violations": 1035, "impact": 1020.15}];
+    const modelRows = [{"model_rank": 1, "police_station": "Shivajinagar", "junction_name": "BTP051 - Safina Plaza Junction", "model_priority_score": 100.0, "history": 100.0, "last_month": 100.0}, {"model_rank": 2, "police_station": "Upparpet", "junction_name": "BTP040 - Elite Junction", "model_priority_score": 91.37, "history": 90.77, "last_month": 92.77}, {"model_rank": 3, "police_station": "City Market", "junction_name": "BTP082 - KR Market Junction", "model_priority_score": 90.74, "history": 91.14, "last_month": 89.81}];
+    const backtestRows = [{"test_month": "2023-12", "precision_at_20": 0.6, "precision_at_50": 0.68, "precision_at_100": 0.69, "ndcg_at_50": 0.9175, "spearman_score_correlation": 0.7633}, {"test_month": "2024-01", "precision_at_20": 0.55, "precision_at_50": 0.78, "precision_at_100": 0.74, "ndcg_at_50": 0.9484, "spearman_score_correlation": 0.7929}, {"test_month": "2024-02", "precision_at_20": 0.5, "precision_at_50": 0.72, "precision_at_100": 0.7, "ndcg_at_50": 0.957, "spearman_score_correlation": 0.779}];
+
+    // States
+    let activeStationFilter = "All";
+    let activeBandFilter = "All";
+    let selectedJunction = null;
+    let map = null;
+    let markersLayer = null;
+    let heatmapOverlay = null;
+
+    function initMap() {
+      // Initialize Leaflet Map
+      map = L.map('map', {
+        center: [12.9716, 77.5946], // Bangalore center
+        zoom: 13,
+        zoomControl: false,
+        attributionControl: false
+      });
+
+      L.tileLayer('https://apis.mappls.com/advancedmaps/v1/1e7534b6bd2475e77f31a57205f8e65b/retina_map/{z}/{x}/{y}.png', {
+        maxZoom: 20
+      }).addTo(map);
+
+      L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+      // Initialize both layers
+      markersLayer = L.layerGroup().addTo(map);
+      heatmapOverlay = L.layerGroup().addTo(map);
+
+      renderMarkers();
+    }
+
+    function renderMarkers() {
+      // Clear old markers and old circles before drawing new ones
+      markersLayer.clearLayers();
+      heatmapOverlay.clearLayers();
+
+      const filtered = hotspots.filter(j =>
+        (activeStationFilter === "All" || j.police_station === activeStationFilter) &&
+        (activeBandFilter === "All" || j.risk_band === activeBandFilter)
+      );
+
+      filtered.forEach((j, index) => {
+        const score = j.congestion_impact_score;
+        let catClass = "watch-marker";
+        let circleColor = "var(--accent-cyan)";
+
+        // Match the dot and circle colors to the risk band
+        if (j.risk_band === "Critical") {
+          catClass = "crit-marker";
+          circleColor = "#ff3b3b";
+        } else if (j.risk_band === "High") {
+          catClass = "high-marker";
+          circleColor = "#ff9d00";
+        } else if (j.risk_band === "Medium") {
+          catClass = "med-marker";
+          circleColor = "#00e676";
+        }
+
+        // 1. Draw the Big Impact Circle
+        const heatmapCircle = L.circle([j.latitude, j.longitude], {
+          radius: 350, // 350-meter radius
+          fillColor: circleColor,
+          fillOpacity: 0.15,
+          stroke: false
+        });
+        heatmapOverlay.addLayer(heatmapCircle);
+
+        // 2. Draw the Pulsing GPS Marker
+        const customIcon = L.divIcon({
+          className: `pulsing-gps-marker ${catClass}`,
+          html: `
+            <div class="marker-ring"></div>
+            <div class="marker-ring-secondary"></div>
+            <div class="marker-dot"></div>
+          `,
+          iconSize: [20, 20],
+          iconAnchor: [10, 10]
+        });
+
+        const marker = L.marker([j.latitude, j.longitude], { icon: customIcon });
+
+        // Leaflet Popup styling
+        let badgeCls = 'score-high';
+        if (catClass === 'crit-marker') badgeCls = 'score-critical';
+        else if (catClass === 'med-marker') badgeCls = 'score-medium';
+
+        const popupContent = `
+          <div style="font-family:'Plus Jakarta Sans',sans-serif; min-width: 160px; padding: 4px 0;">
+            <div style="font-weight:800; font-size:12.5px; margin-bottom: 2px; color: var(--text-main);">${j.junction_name}</div>
+            <div style="color:var(--text-muted); font-size:9.5px; margin-bottom: 8px;">${j.police_station}</div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="score-badge ${badgeCls}">${j.risk_band}</span>
+              <span style="font-family:'Share Tech Mono'; font-weight:700; font-size:11px; color:var(--accent-cyan)">Score: ${parseFloat(score).toFixed(1)}</span>
+            </div>
+          </div>
+        `;
+
+        marker.bindPopup(popupContent, { offset: L.point(0, -5) });
+        marker.on('click', () => selectJunction(hotspots.indexOf(j)));
+        markersLayer.addLayer(marker);
+      });
+    }
+
+    function populateHotspotList() {
+      const listEl = document.getElementById("hotspotList");
+      listEl.innerHTML = "";
+
+      const filtered = hotspots.filter(j =>
+        (activeStationFilter === "All" || j.police_station === activeStationFilter) &&
+        (activeBandFilter === "All" || j.risk_band === activeBandFilter)
+      );
+
+      filtered.forEach((j) => {
+        const originalIndex = hotspots.indexOf(j);
+        const activeClass = selectedJunction && (selectedJunction.priority_rank === j.priority_rank) ? "active" : "";
+        const score = j.congestion_impact_score;
+
+        let scoreClass = "score-high";
+        if (score > 60 || j.risk_band === "Critical") scoreClass = "score-critical";
+        else if (j.risk_band === "Medium") scoreClass = "score-medium";
+
+        const item = document.createElement("div");
+        item.className = `hotspot-item ${activeClass}`;
+        item.onclick = () => selectJunction(originalIndex);
+
+        item.innerHTML = `
+          <div class="hotspot-info">
+            <span class="hotspot-name">${j.junction_name}</span>
+            <span class="hotspot-sub">${j.police_station} &bull; ${parseInt(j.violation_count).toLocaleString()} Viol.</span>
+          </div>
+          <span class="score-badge ${scoreClass}">${parseFloat(score).toFixed(1)}</span>
+        `;
+        listEl.appendChild(item);
+      });
+    }
+
+    function selectJunction(index) {
+      const junction = hotspots[index];
+      if (!junction) return;
+      selectedJunction = junction;
+
+      document.querySelectorAll(".hotspot-item").forEach(item => item.classList.remove("active"));
+      populateHotspotList();
+
+      const detailContainer = document.getElementById("detailsContainer");
+      const score = junction.congestion_impact_score;
+      let badgeClass = "score-high";
+      if (score > 60 || junction.risk_band === "Critical") badgeClass = "score-critical";
+      else if (junction.risk_band === "Medium") badgeClass = "score-medium";
+
+      detailContainer.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 4px;">
+          <div>
+            <h4 style="font-size: 14px; font-weight: 800; color: var(--text-main);">${junction.junction_name}</h4>
+            <span style="font-size: 10px; color: var(--text-muted); font-weight: 500;">District: ${junction.police_station} &bull; Grid ${parseFloat(junction.latitude).toFixed(4)}, ${parseFloat(junction.longitude).toFixed(4)}</span>
+          </div>
+          <span class="score-badge ${badgeClass}">${parseFloat(score).toFixed(1)}</span>
+        </div>
+
+        <div class="detail-grid" style="margin-top: 8px;">
+          <div class="detail-cell">
+            <div class="detail-label">Total Violations</div>
+            <div class="detail-value mono" style="color:var(--accent-cyan);">${parseInt(junction.violation_count).toLocaleString()}</div>
+          </div>
+          <div class="detail-cell">
+            <div class="detail-label">Peak Hour Share</div>
+            <div class="detail-value mono" style="color:var(--accent-amber);">${parseFloat(junction.peak_hour_share).toFixed(1)}%</div>
+          </div>
+          <div class="detail-cell">
+            <div class="detail-label">Frequency Score</div>
+            <div class="detail-value mono" style="color:var(--text-main);">${junction.parking_violation_frequency_score}</div>
+          </div>
+          <div class="detail-cell">
+            <div class="detail-label">Vehicle Blockage</div>
+            <div class="detail-value mono" style="color:var(--text-main);">${junction.vehicle_blockage_score}</div>
+          </div>
+        </div>
+
+        <div class="strategy-alert">
+          <i data-lucide="shield-check" size="18"></i>
+          <span class="strategy-text"><strong>Priority action:</strong> ${junction.recommended_action}</span>
+        </div>
+      `;
+      lucide.createIcons();
+
+      map.setView([junction.latitude, junction.longitude], 15, { animate: true, duration: 0.6 });
+    }
+
+    // Filters Logic
+    function setBandFilter(band) {
+      activeBandFilter = band;
+      document.querySelectorAll('.map-controls-overlay .map-btn').forEach(b => {
+        if(b.id.startsWith('filter-')) b.classList.remove('active');
+      });
+      if(band === 'All') document.getElementById('filter-all').classList.add('active');
+      if(band === 'Critical') document.getElementById('filter-crit').classList.add('active');
+      if(band === 'High') document.getElementById('filter-high').classList.add('active');
+
+      renderMarkers();
+      populateHotspotList();
+    }
+
+    function initStationFilters() {
+      const container = document.getElementById('stationFilters');
+      const names = [...new Set(hotspots.map(p => p.police_station))].slice(0, 4); // Show top 4 to fit UI
+      names.forEach(name => {
+        const btn = document.createElement('button');
+        btn.className = 'pill-btn';
+        btn.dataset.station = name;
+        btn.innerText = name;
+        btn.onclick = () => {
+          container.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          activeStationFilter = name;
+          renderMarkers();
+          populateHotspotList();
+
+          const filtered = hotspots.filter(j => activeStationFilter === "All" || j.police_station === activeStationFilter);
+          if (filtered.length > 0) {
+            const latLngs = filtered.map(f => [f.latitude, f.longitude]);
+            map.fitBounds(latLngs, { padding: [50, 50] });
+          }
+        };
+        container.appendChild(btn);
+      });
+
+      // 'All stations' button
+      container.querySelector('[data-station="All"]').onclick = function() {
+        container.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        activeStationFilter = "All";
+        renderMarkers();
+        populateHotspotList();
+        map.setView([12.9716, 77.5946], 13);
+      };
+    }
+
+    // View Navigation Logic
+    document.querySelectorAll('.nav-item').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.view-pane').forEach(v => v.classList.remove('active-view'));
+
+        btn.classList.add('active');
+        const targetId = btn.dataset.target;
+        document.getElementById(targetId).classList.add('active-view');
+
+        if (targetId === 'view-dashboard' && map) {
+          setTimeout(() => map.invalidateSize(), 50);
+        }
+      };
+    });
+
+    document.getElementById("recenterMap").onclick = () => {
+      map.setView([12.9716, 77.5946], 13, { animate: true });
+    };
+
+    // Light / Dark mode toggle
+    function initThemeToggle() {
+      const root = document.documentElement;
+      const btn = document.getElementById('themeToggle');
+      btn.onclick = () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        if (map) setTimeout(() => map.invalidateSize(), 320);
+      };
+    }
+
+    // Selected Hotspot panel collapser
+    function initRightPanelCollapse() {
+      const grid = document.getElementById('commandGrid');
+      const toggle = document.getElementById('rightPanelToggle');
+      toggle.onclick = () => {
+        grid.classList.toggle('right-collapsed');
+        toggle.title = grid.classList.contains('right-collapsed') ? 'Expand panel' : 'Collapse panel';
+        if (map) setTimeout(() => map.invalidateSize(), 320);
+      };
+    }
+
+    // Render Data Tables matching the photo exactly (wrapped in container, styled <th>/<td>)
+    function renderTable(id, cols, data, limit) {
+      const container = document.getElementById(id);
+
+      if(container.tagName.toLowerCase() === 'table') {
+        const parent = container.parentElement;
+        parent.classList.remove('table-container');
+        parent.id = id;
+        parent.classList.add('outcomes-grid');
+        parent.style.gridTemplateColumns = 'repeat(auto-fit, minmax(360px, 1fr))';
+        parent.style.gap = '24px';
+        parent.innerHTML = '';
+        return renderTable(id, cols, data, limit);
+      }
+
+      container.innerHTML = data.slice(0, limit).map(r => {
+        let badge = cols[0];
+        let primary = cols.length > 1 ? cols[1] : cols[0];
+
+        let html = '<div class="outcome-card" style="padding: 24px; min-height: 160px; display: flex; flex-direction: column; justify-content: center;">';
+
+        // Top row
+        html += '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">';
+        html += '<div style="flex: 1; padding-right: 12px;">';
+        html += '<div class="outcome-title" style="margin-bottom: 8px; font-size: 11.5px;">' + primary.label + '</div>';
+        html += '<div class="outcome-value" style="font-size: 18px; line-height: 1.4;">' + (primary.html ? primary.html(r) : r[primary.key]) + '</div>';
+        html += '</div>';
+        html += '<div style="transform: scale(1.15); transform-origin: top right;">' + (badge.html ? badge.html(r) : r[badge.key]) + '</div>';
+        html += '</div>';
+
+        // Other columns
+        cols.forEach((c) => {
+           if (c !== primary && c !== badge) {
+              html += '<div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px; margin-top: 12px;">';
+              html += '<span class="outcome-sub" style="margin: 0; font-size: 11.5px;">' + c.label + '</span>';
+              html += '<span style="font-size: 14px; color: var(--text-main); font-weight: 500;">' + (c.html ? c.html(r) : r[c.key]) + '</span>';
+              html += '</div>';
+           }
+        });
+
+        html += '</div>';
+        return html;
+      }).join('');
+    }
+
+    function rowBand(band) {
+      let cls = 'score-high';
+      if (band === 'Critical') cls = 'score-critical';
+      else if (band === 'Medium') cls = 'score-medium';
+      return `<span class="score-badge ${cls}">${band}</span>`;
+    }
+
+    function renderBars() {
+      const maxImpact = Math.max(...hourly.map(h => h.impact));
+      const wrap = document.getElementById('hour-bars');
+      wrap.innerHTML = hourly.map(h => {
+        const width = 100 * h.impact / maxImpact;
+        return `
+          <div class="efficiency-bar-group">
+            <div class="efficiency-bar-info">
+              <span class="efficiency-bar-label">${String(h.hour).padStart(2, '0')}:00 Hour</span>
+              <span class="efficiency-bar-val">${parseInt(h.violations).toLocaleString()} Viol.</span>
+            </div>
+            <div class="efficiency-bar-outer">
+              <div class="efficiency-bar-inner" style="width:${width}%; background-color: var(--accent-cyan);"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Boot Up
+    window.onload = () => {
+      lucide.createIcons();
+      initMap();
+      initStationFilters();
+      populateHotspotList();
+      selectJunction(0);
+      initThemeToggle();
+      initRightPanelCollapse();
+
+      // Populate Tables matching photo's format
+      renderTable('hotspot-table', [
+        { label: 'Rank', html: r => `<span style="font-family:'Share Tech Mono'; color:var(--accent-cyan)">#${r.priority_rank}</span>` },
+        { label: 'Zone', html: r => `<strong style="font-size:13px">${r.junction_name}</strong><br><span style="color:var(--text-muted); font-size:10px">${r.police_station}</span>` },
+        { label: 'Count', html: r => `<span style="font-family:'Share Tech Mono'">${parseInt(r.violation_count).toLocaleString()}</span>` },
+        { label: 'Risk', html: r => rowBand(r.risk_band) }
+      ], hotspots, 48);
+
+      renderTable('station-table', [
+        { label: 'Station', html: r => `<strong style="font-size:13px">${r.police_station}</strong>` },
+        { label: 'Violations', html: r => `<span style="font-family:'Share Tech Mono'">${parseInt(r.violation_count).toLocaleString()}</span>` },
+        { label: 'High Zones', html: r => `<span style="font-family:'Share Tech Mono'">${r.high_priority_hotspots}</span>` },
+        { label: 'Score', html: r => `<span style="font-family:'Share Tech Mono'; color:var(--accent-cyan)">${Number(r.station_priority_score).toFixed(2)}</span>` }
+      ], stations, 24);
+
+      renderTable('shift-table', [
+        { label: 'Rank', html: r => `<span style="font-family:'Share Tech Mono'; color:var(--accent-cyan)">#${r.priority_rank}</span>` },
+        { label: 'Zone', html: r => `<strong style="font-size:13px">${r.junction_name}</strong>` },
+        { label: 'Target Hours', html: r => `<span style="font-family:'Share Tech Mono'">${r.best_enforcement_hours}</span>` }
+      ], shifts, 48);
+
+      renderTable('record-table', [
+        { label: 'Record', html: r => `<span style="font-family:'Share Tech Mono'">HP-${String(r.priority_rank).padStart(4, '0')}</span>` },
+        { label: 'Zone', html: r => `<strong>${r.junction_name}</strong>` },
+        { label: 'Risk', html: r => rowBand(r.risk_band) },
+        { label: 'Score', html: r => `<span style="font-family:'Share Tech Mono'">${Number(r.congestion_impact_score).toFixed(2)}</span>` }
+      ], hotspots, 48);
+
+      renderTable('model-table', [
+        { label: 'Rank', html: r => `<span style="font-family:'Share Tech Mono'; color:var(--accent-cyan)">#${r.model_rank}</span>` },
+        { label: 'Zone', html: r => `<strong>${r.junction_name}</strong>` },
+        { label: 'Model Score', html: r => `<span style="font-family:'Share Tech Mono'">${Number(r.model_priority_score).toFixed(2)}</span>` },
+        { label: 'History', html: r => `<span style="font-family:'Share Tech Mono'">${Number(r.history).toFixed(2)}</span>` }
+      ], modelRows, 48);
+
+      renderTable('backtest-table', [
+        { label: 'Test Month', html: r => `<span style="font-family:'Share Tech Mono'">${r.test_month}</span>` },
+        { label: 'P@20', html: r => `<span style="font-family:'Share Tech Mono'">${(100 * Number(r.precision_at_20)).toFixed(1)}%</span>` },
+        { label: 'NDCG@50', html: r => `<span style="font-family:'Share Tech Mono'">${(100 * Number(r.ndcg_at_50)).toFixed(1)}%</span>` },
+        { label: 'Spearman', html: r => `<span style="font-family:'Share Tech Mono'; color:var(--accent-cyan)">${Number(r.spearman_score_correlation).toFixed(3)}</span>` }
+      ], backtestRows, 24);
+
+      renderBars();
+    };
+  </script>
+</body>
+</html>

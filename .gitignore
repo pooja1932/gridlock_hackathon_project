@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+env/
+
+# Local datasets are not committed; pass them with --input.
+data/*.csv
+data/*.zip
+
+# Temporary browser/export checks.
+test.html
+test1.html

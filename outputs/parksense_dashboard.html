@@ -1,0 +1,603 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ParkSense AI - Parking Congestion Intelligence</title>
+  <style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+  
+  body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
+  
+  .card { 
+    background: #1e293b; 
+    border: 1px solid #334155; 
+    padding: 20px; 
+    border-radius: 12px; 
+  }
+  
+  .metric { font-size: 2rem; font-weight: 700; color: #38bdf8; }
+  
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  
+  th { text-align: left; padding: 12px; color: #94a3b8; font-size: 0.8rem; text-transform: uppercase; border-bottom: 1px solid #334155; }
+  
+  td { padding: 12px; border-bottom: 1px solid #334155; font-size: 0.9rem; }
+  
+  /* Badge styling for Risk Bands */
+  .badge-Critical { background: #7f1d1d; color: #fecaca; }
+  .badge-High { background: #78350f; color: #fef3c7; }
+  .badge-Medium { background: #064e3b; color: #a7f3d0; }
+  .badge-Watch { background: #1e3a8a; color: #bfdbfe; }
+</style>
+</head>
+<body>
+  <h1>ParkSense AI</h1>
+  <p>Illegal parking hotspot detection and congestion-impact prioritization for targeted enforcement.</p>
+  <div class="grid">
+    <div class="card"><div class="metric">298,445</div><div>parking violations analysed</div></div>
+    <div class="card"><div class="metric">7,814</div><div>spatial hotspots</div></div>
+    <div class="card"><div class="metric">0</div><div>critical hotspots</div></div>
+    <div class="card"><div class="metric">54</div><div>police stations covered</div></div>
+  </div>
+
+  <h2>Hotspot Map Preview</h2>
+  <p class="legend"><span style="background:#d62828"></span>Critical <span style="background:#f77f00"></span>High <span style="background:#fcbf49"></span>Medium <span style="background:#2a9d8f"></span>Watch</p>
+  <div id="map"></div>
+
+  <h2>Top Enforcement Hotspots</h2>
+  <table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>priority_rank</th>
+      <th>police_station</th>
+      <th>junction_name</th>
+      <th>violation_count</th>
+      <th>congestion_impact_score</th>
+      <th>risk_band</th>
+      <th>recommended_action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>Shivajinagar</td>
+      <td>BTP051 - Safina Plaza Junction</td>
+      <td>4411</td>
+      <td>75.17</td>
+      <td>High</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>City Market</td>
+      <td>BTP082 - KR Market Junction</td>
+      <td>3745</td>
+      <td>68.51</td>
+      <td>High</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Upparpet</td>
+      <td>BTP040 - Elite Junction</td>
+      <td>3181</td>
+      <td>68.23</td>
+      <td>High</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Upparpet</td>
+      <td>BTP044 - Sagar Theatre Junction</td>
+      <td>2366</td>
+      <td>66.29</td>
+      <td>High</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>City Market</td>
+      <td>BTP082 - KR Market Junction</td>
+      <td>1933</td>
+      <td>62.68</td>
+      <td>High</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Shivajinagar</td>
+      <td>BTP051 - Safina Plaza Junction</td>
+      <td>1117</td>
+      <td>62.66</td>
+      <td>High</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Vijayanagara</td>
+      <td>BTP020 - Hosahalli Metro Station</td>
+      <td>1766</td>
+      <td>61.93</td>
+      <td>High</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>Upparpet</td>
+      <td>BTP040 - Elite Junction</td>
+      <td>1907</td>
+      <td>61.92</td>
+      <td>High</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>Upparpet</td>
+      <td>BTP040 - Elite Junction</td>
+      <td>1795</td>
+      <td>61.78</td>
+      <td>High</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>Shivajinagar</td>
+      <td>BTP211 - Central Street Junction</td>
+      <td>1649</td>
+      <td>61.33</td>
+      <td>High</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>11</td>
+      <td>Shivajinagar</td>
+      <td>BTP211 - Central Street Junction</td>
+      <td>1630</td>
+      <td>60.72</td>
+      <td>High</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td>HAL Old Airport</td>
+      <td>No Junction</td>
+      <td>3343</td>
+      <td>60.05</td>
+      <td>High</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>13</td>
+      <td>Shivajinagar</td>
+      <td>BTP051 - Safina Plaza Junction</td>
+      <td>1408</td>
+      <td>59.70</td>
+      <td>Medium</td>
+      <td>Warning drive + repeat-offender monitoring</td>
+    </tr>
+    <tr>
+      <td>14</td>
+      <td>Upparpet</td>
+      <td>BTP044 - Sagar Theatre Junction</td>
+      <td>1207</td>
+      <td>59.65</td>
+      <td>Medium</td>
+      <td>Warning drive + repeat-offender monitoring</td>
+    </tr>
+    <tr>
+      <td>15</td>
+      <td>Vijayanagara</td>
+      <td>BTP016 - 5th Main Road, RPC Layout</td>
+      <td>1402</td>
+      <td>59.49</td>
+      <td>Medium</td>
+      <td>Warning drive + repeat-offender monitoring</td>
+    </tr>
+  </tbody>
+</table>
+
+  <h2>Station Priority Summary</h2>
+  <table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>police_station</th>
+      <th>violation_count</th>
+      <th>impact_sum</th>
+      <th>peak_hour_share</th>
+      <th>junction_share</th>
+      <th>unique_hotspots</th>
+      <th>high_priority_hotspots</th>
+      <th>station_priority_score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Upparpet</td>
+      <td>34468</td>
+      <td>35573.03</td>
+      <td>0.35</td>
+      <td>0.99</td>
+      <td>102</td>
+      <td>4</td>
+      <td>93.51</td>
+    </tr>
+    <tr>
+      <td>Shivajinagar</td>
+      <td>28044</td>
+      <td>25612.45</td>
+      <td>0.43</td>
+      <td>0.81</td>
+      <td>144</td>
+      <td>4</td>
+      <td>89.85</td>
+    </tr>
+    <tr>
+      <td>City Market</td>
+      <td>17646</td>
+      <td>16441.76</td>
+      <td>0.28</td>
+      <td>0.94</td>
+      <td>132</td>
+      <td>2</td>
+      <td>71.30</td>
+    </tr>
+    <tr>
+      <td>HAL Old Airport</td>
+      <td>20819</td>
+      <td>19927.17</td>
+      <td>0.28</td>
+      <td>0.00</td>
+      <td>311</td>
+      <td>1</td>
+      <td>69.16</td>
+    </tr>
+    <tr>
+      <td>Malleshwaram</td>
+      <td>22200</td>
+      <td>21056.03</td>
+      <td>0.39</td>
+      <td>0.34</td>
+      <td>220</td>
+      <td>0</td>
+      <td>66.15</td>
+    </tr>
+    <tr>
+      <td>Vijayanagara</td>
+      <td>14652</td>
+      <td>11547.40</td>
+      <td>0.31</td>
+      <td>0.95</td>
+      <td>204</td>
+      <td>1</td>
+      <td>61.95</td>
+    </tr>
+    <tr>
+      <td>Rajajinagar</td>
+      <td>10998</td>
+      <td>11116.31</td>
+      <td>0.27</td>
+      <td>0.80</td>
+      <td>304</td>
+      <td>0</td>
+      <td>54.57</td>
+    </tr>
+    <tr>
+      <td>Kodigehalli</td>
+      <td>10916</td>
+      <td>7537.27</td>
+      <td>0.26</td>
+      <td>0.00</td>
+      <td>292</td>
+      <td>0</td>
+      <td>50.47</td>
+    </tr>
+    <tr>
+      <td>Magadi Road</td>
+      <td>8558</td>
+      <td>6682.69</td>
+      <td>0.23</td>
+      <td>0.78</td>
+      <td>222</td>
+      <td>0</td>
+      <td>47.65</td>
+    </tr>
+    <tr>
+      <td>Halasuru Gate</td>
+      <td>6294</td>
+      <td>6454.30</td>
+      <td>0.37</td>
+      <td>1.00</td>
+      <td>147</td>
+      <td>0</td>
+      <td>47.04</td>
+    </tr>
+  </tbody>
+</table>
+
+  <h2>Suggested Shift Plan</h2>
+  <table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>priority_rank</th>
+      <th>grid_id</th>
+      <th>latitude</th>
+      <th>longitude</th>
+      <th>police_station</th>
+      <th>junction_name</th>
+      <th>risk_band</th>
+      <th>congestion_impact_score</th>
+      <th>best_enforcement_hours</th>
+      <th>recommended_action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>12.981,77.61</td>
+      <td>12.98</td>
+      <td>77.61</td>
+      <td>Shivajinagar</td>
+      <td>BTP051 - Safina Plaza Junction</td>
+      <td>High</td>
+      <td>75.17</td>
+      <td>10:00, 09:00, 11:00</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>12.964,77.577</td>
+      <td>12.96</td>
+      <td>77.58</td>
+      <td>City Market</td>
+      <td>BTP082 - KR Market Junction</td>
+      <td>High</td>
+      <td>68.51</td>
+      <td>00:00, 01:00, 10:00</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>12.977,77.576</td>
+      <td>12.98</td>
+      <td>77.58</td>
+      <td>Upparpet</td>
+      <td>BTP040 - Elite Junction</td>
+      <td>High</td>
+      <td>68.23</td>
+      <td>09:00, 08:00, 10:00</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>12.973,77.579</td>
+      <td>12.97</td>
+      <td>77.58</td>
+      <td>Upparpet</td>
+      <td>BTP044 - Sagar Theatre Junction</td>
+      <td>High</td>
+      <td>66.29</td>
+      <td>10:00, 09:00, 08:00</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>12.965,77.576</td>
+      <td>12.96</td>
+      <td>77.58</td>
+      <td>City Market</td>
+      <td>BTP082 - KR Market Junction</td>
+      <td>High</td>
+      <td>62.68</td>
+      <td>09:00, 01:00, 08:00</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>12.982,77.606</td>
+      <td>12.98</td>
+      <td>77.61</td>
+      <td>Shivajinagar</td>
+      <td>BTP051 - Safina Plaza Junction</td>
+      <td>High</td>
+      <td>62.66</td>
+      <td>10:00, 08:00, 11:00</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>12.974,77.545</td>
+      <td>12.97</td>
+      <td>77.55</td>
+      <td>Vijayanagara</td>
+      <td>BTP020 - Hosahalli Metro Station</td>
+      <td>High</td>
+      <td>61.93</td>
+      <td>04:00, 08:00, 06:00</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>12.977,77.577</td>
+      <td>12.98</td>
+      <td>77.58</td>
+      <td>Upparpet</td>
+      <td>BTP040 - Elite Junction</td>
+      <td>High</td>
+      <td>61.92</td>
+      <td>08:00, 09:00, 10:00</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>12.976,77.577</td>
+      <td>12.98</td>
+      <td>77.58</td>
+      <td>Upparpet</td>
+      <td>BTP040 - Elite Junction</td>
+      <td>High</td>
+      <td>61.78</td>
+      <td>09:00, 08:00, 10:00</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>12.984,77.603</td>
+      <td>12.98</td>
+      <td>77.60</td>
+      <td>Shivajinagar</td>
+      <td>BTP211 - Central Street Junction</td>
+      <td>High</td>
+      <td>61.33</td>
+      <td>10:00, 11:00, 08:00</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>11</td>
+      <td>12.984,77.604</td>
+      <td>12.98</td>
+      <td>77.60</td>
+      <td>Shivajinagar</td>
+      <td>BTP211 - Central Street Junction</td>
+      <td>High</td>
+      <td>60.72</td>
+      <td>10:00, 09:00, 11:00</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td>12.934,77.691</td>
+      <td>12.93</td>
+      <td>77.69</td>
+      <td>HAL Old Airport</td>
+      <td>No Junction</td>
+      <td>High</td>
+      <td>60.05</td>
+      <td>04:00, 05:00, 09:00</td>
+      <td>Focused patrol during top 2 peak hours</td>
+    </tr>
+    <tr>
+      <td>13</td>
+      <td>12.982,77.608</td>
+      <td>12.98</td>
+      <td>77.61</td>
+      <td>Shivajinagar</td>
+      <td>BTP051 - Safina Plaza Junction</td>
+      <td>Medium</td>
+      <td>59.70</td>
+      <td>10:00, 08:00, 11:00</td>
+      <td>Warning drive + repeat-offender monitoring</td>
+    </tr>
+    <tr>
+      <td>14</td>
+      <td>12.976,77.578</td>
+      <td>12.98</td>
+      <td>77.58</td>
+      <td>Upparpet</td>
+      <td>BTP044 - Sagar Theatre Junction</td>
+      <td>Medium</td>
+      <td>59.65</td>
+      <td>09:00, 08:00, 10:00</td>
+      <td>Warning drive + repeat-offender monitoring</td>
+    </tr>
+    <tr>
+      <td>15</td>
+      <td>12.965,77.539</td>
+      <td>12.96</td>
+      <td>77.54</td>
+      <td>Vijayanagara</td>
+      <td>BTP016 - 5th Main Road, RPC Layout</td>
+      <td>Medium</td>
+      <td>59.49</td>
+      <td>03:00, 11:00, 10:00</td>
+      <td>Warning drive + repeat-offender monitoring</td>
+    </tr>
+    <tr>
+      <td>16</td>
+      <td>12.975,77.576</td>
+      <td>12.98</td>
+      <td>77.58</td>
+      <td>Upparpet</td>
+      <td>BTP040 - Elite Junction</td>
+      <td>Medium</td>
+      <td>59.23</td>
+      <td>09:00, 08:00, 10:00</td>
+      <td>Warning drive + repeat-offender monitoring</td>
+    </tr>
+    <tr>
+      <td>17</td>
+      <td>12.98,77.607</td>
+      <td>12.98</td>
+      <td>77.61</td>
+      <td>Shivajinagar</td>
+      <td>BTP051 - Safina Plaza Junction</td>
+      <td>Medium</td>
+      <td>58.94</td>
+      <td>10:00, 09:00, 11:00</td>
+      <td>Warning drive + repeat-offender monitoring</td>
+    </tr>
+    <tr>
+      <td>18</td>
+      <td>13.0,77.55</td>
+      <td>13.00</td>
+      <td>77.55</td>
+      <td>Malleshwaram</td>
+      <td>BTP027 - Modi Bridge Junction</td>
+      <td>Medium</td>
+      <td>58.87</td>
+      <td>08:00, 09:00, 07:00</td>
+      <td>Warning drive + repeat-offender monitoring</td>
+    </tr>
+    <tr>
+      <td>19</td>
+      <td>12.977,77.58</td>
+      <td>12.98</td>
+      <td>77.58</td>
+      <td>Upparpet</td>
+      <td>BTP044 - Sagar Theatre Junction</td>
+      <td>Medium</td>
+      <td>58.68</td>
+      <td>09:00, 08:00, 10:00</td>
+      <td>Warning drive + repeat-offender monitoring</td>
+    </tr>
+    <tr>
+      <td>20</td>
+      <td>12.981,77.609</td>
+      <td>12.98</td>
+      <td>77.61</td>
+      <td>Shivajinagar</td>
+      <td>BTP051 - Safina Plaza Junction</td>
+      <td>Medium</td>
+      <td>58.36</td>
+      <td>08:00, 10:00, 09:00</td>
+      <td>Warning drive + repeat-offender monitoring</td>
+    </tr>
+  </tbody>
+</table>
+
+<script>
+const points = [{"priority_rank": 1, "latitude": 12.981084, "longitude": 77.610135, "police_station": "Shivajinagar", "junction_name": "BTP051 - Safina Plaza Junction", "violation_count": 4411, "congestion_impact_score": 75.17, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 2, "latitude": 12.964078, "longitude": 77.5769, "police_station": "City Market", "junction_name": "BTP082 - KR Market Junction", "violation_count": 3745, "congestion_impact_score": 68.51, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 3, "latitude": 12.977186, "longitude": 77.576132, "police_station": "Upparpet", "junction_name": "BTP040 - Elite Junction", "violation_count": 3181, "congestion_impact_score": 68.23, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 4, "latitude": 12.973088, "longitude": 77.579036, "police_station": "Upparpet", "junction_name": "BTP044 - Sagar Theatre Junction", "violation_count": 2366, "congestion_impact_score": 66.29, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 5, "latitude": 12.964684, "longitude": 77.57617, "police_station": "City Market", "junction_name": "BTP082 - KR Market Junction", "violation_count": 1933, "congestion_impact_score": 62.68, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 6, "latitude": 12.982039, "longitude": 77.606317, "police_station": "Shivajinagar", "junction_name": "BTP051 - Safina Plaza Junction", "violation_count": 1117, "congestion_impact_score": 62.66, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 7, "latitude": 12.974177, "longitude": 77.545002, "police_station": "Vijayanagara", "junction_name": "BTP020 - Hosahalli Metro Station", "violation_count": 1766, "congestion_impact_score": 61.93, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 8, "latitude": 12.977003, "longitude": 77.577065, "police_station": "Upparpet", "junction_name": "BTP040 - Elite Junction", "violation_count": 1907, "congestion_impact_score": 61.92, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 9, "latitude": 12.976102, "longitude": 77.577254, "police_station": "Upparpet", "junction_name": "BTP040 - Elite Junction", "violation_count": 1795, "congestion_impact_score": 61.78, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 10, "latitude": 12.984194, "longitude": 77.6032, "police_station": "Shivajinagar", "junction_name": "BTP211 - Central Street Junction", "violation_count": 1649, "congestion_impact_score": 61.33, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 11, "latitude": 12.984, "longitude": 77.603668, "police_station": "Shivajinagar", "junction_name": "BTP211 - Central Street Junction", "violation_count": 1630, "congestion_impact_score": 60.72, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 12, "latitude": 12.933868, "longitude": 77.690868, "police_station": "HAL Old Airport", "junction_name": "No Junction", "violation_count": 3343, "congestion_impact_score": 60.05, "risk_band": "High", "recommended_action": "Focused patrol during top 2 peak hours"}, {"priority_rank": 13, "latitude": 12.981729, "longitude": 77.608157, "police_station": "Shivajinagar", "junction_name": "BTP051 - Safina Plaza Junction", "violation_count": 1408, "congestion_impact_score": 59.7, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 14, "latitude": 12.976056, "longitude": 77.578152, "police_station": "Upparpet", "junction_name": "BTP044 - Sagar Theatre Junction", "violation_count": 1207, "congestion_impact_score": 59.65, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 15, "latitude": 12.964869, "longitude": 77.538875, "police_station": "Vijayanagara", "junction_name": "BTP016 - 5th Main Road, RPC Layout", "violation_count": 1402, "congestion_impact_score": 59.49, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 16, "latitude": 12.975339, "longitude": 77.57614, "police_station": "Upparpet", "junction_name": "BTP040 - Elite Junction", "violation_count": 1277, "congestion_impact_score": 59.23, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 17, "latitude": 12.979781, "longitude": 77.607192, "police_station": "Shivajinagar", "junction_name": "BTP051 - Safina Plaza Junction", "violation_count": 1350, "congestion_impact_score": 58.94, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 18, "latitude": 13.000026, "longitude": 77.549833, "police_station": "Malleshwaram", "junction_name": "BTP027 - Modi Bridge Junction", "violation_count": 1327, "congestion_impact_score": 58.87, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 19, "latitude": 12.976957, "longitude": 77.579982, "police_station": "Upparpet", "junction_name": "BTP044 - Sagar Theatre Junction", "violation_count": 1257, "congestion_impact_score": 58.68, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 20, "latitude": 12.981359, "longitude": 77.608901, "police_station": "Shivajinagar", "junction_name": "BTP051 - Safina Plaza Junction", "violation_count": 1074, "congestion_impact_score": 58.36, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 21, "latitude": 12.964927, "longitude": 77.584045, "police_station": "Halasuru Gate", "junction_name": "BTP080 - NR Road, SP Road Junction", "violation_count": 1213, "congestion_impact_score": 58.31, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 22, "latitude": 12.973418, "longitude": 77.551003, "police_station": "Magadi Road", "junction_name": "BTP070 - Cholurpalya Junction, Magadi Road", "violation_count": 1105, "congestion_impact_score": 57.54, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 23, "latitude": 12.981001, "longitude": 77.607731, "police_station": "Shivajinagar", "junction_name": "BTP051 - Safina Plaza Junction", "violation_count": 1074, "congestion_impact_score": 57.27, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 24, "latitude": 12.974616, "longitude": 77.545106, "police_station": "Vijayanagara", "junction_name": "BTP020 - Hosahalli Metro Station", "violation_count": 1011, "congestion_impact_score": 57.23, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 25, "latitude": 12.933187, "longitude": 77.691204, "police_station": "HAL Old Airport", "junction_name": "No Junction", "violation_count": 2375, "congestion_impact_score": 57.07, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 26, "latitude": 12.973679, "longitude": 77.579103, "police_station": "Upparpet", "junction_name": "BTP044 - Sagar Theatre Junction", "violation_count": 1078, "congestion_impact_score": 56.75, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 27, "latitude": 12.981067, "longitude": 77.59841, "police_station": "Shivajinagar", "junction_name": "BTP042 - Minsk Square Junction (CTO)", "violation_count": 977, "congestion_impact_score": 56.67, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 28, "latitude": 12.981857, "longitude": 77.610189, "police_station": "Shivajinagar", "junction_name": "BTP051 - Safina Plaza Junction", "violation_count": 1142, "congestion_impact_score": 56.62, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 29, "latitude": 12.964264, "longitude": 77.578019, "police_station": "City Market", "junction_name": "BTP082 - KR Market Junction", "violation_count": 980, "congestion_impact_score": 56.23, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 30, "latitude": 12.973672, "longitude": 77.551162, "police_station": "Magadi Road", "junction_name": "BTP070 - Cholurpalya Junction, Magadi Road", "violation_count": 1107, "congestion_impact_score": 56.23, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 31, "latitude": 12.975883, "longitude": 77.576045, "police_station": "Upparpet", "junction_name": "BTP040 - Elite Junction", "violation_count": 1174, "congestion_impact_score": 55.98, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 32, "latitude": 12.974042, "longitude": 77.578245, "police_station": "Upparpet", "junction_name": "BTP044 - Sagar Theatre Junction", "violation_count": 894, "congestion_impact_score": 55.88, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 33, "latitude": 12.97803, "longitude": 77.573883, "police_station": "Upparpet", "junction_name": "BTP045 - Danvanthri Road Junction", "violation_count": 1167, "congestion_impact_score": 55.8, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 34, "latitude": 12.974351, "longitude": 77.545854, "police_station": "Vijayanagara", "junction_name": "BTP020 - Hosahalli Metro Station", "violation_count": 813, "congestion_impact_score": 55.75, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 35, "latitude": 12.980005, "longitude": 77.574888, "police_station": "Upparpet", "junction_name": "BTP057 - Anand Rao Junction", "violation_count": 1033, "congestion_impact_score": 55.66, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 36, "latitude": 12.977245, "longitude": 77.570755, "police_station": "Chamarajpet", "junction_name": "BTP048 - Shanthala Junction", "violation_count": 1004, "congestion_impact_score": 55.63, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 37, "latitude": 12.97795, "longitude": 77.575376, "police_station": "Upparpet", "junction_name": "BTP045 - Danvanthri Road Junction", "violation_count": 1035, "congestion_impact_score": 55.38, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 38, "latitude": 13.07119, "longitude": 77.588038, "police_station": "Kodigehalli", "junction_name": "No Junction", "violation_count": 3280, "congestion_impact_score": 55.23, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 39, "latitude": 12.964138, "longitude": 77.583956, "police_station": "Halasuru Gate", "junction_name": "BTP080 - NR Road, SP Road Junction", "violation_count": 931, "congestion_impact_score": 55.23, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 40, "latitude": 12.999164, "longitude": 77.548894, "police_station": "Rajajinagar", "junction_name": "BTP027 - Modi Bridge Junction", "violation_count": 991, "congestion_impact_score": 55.12, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 41, "latitude": 12.999233, "longitude": 77.54974, "police_station": "Rajajinagar", "junction_name": "BTP027 - Modi Bridge Junction", "violation_count": 909, "congestion_impact_score": 55.07, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 42, "latitude": 12.978963, "longitude": 77.575068, "police_station": "Upparpet", "junction_name": "BTP057 - Anand Rao Junction", "violation_count": 939, "congestion_impact_score": 54.99, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 43, "latitude": 12.976928, "longitude": 77.578937, "police_station": "Upparpet", "junction_name": "BTP044 - Sagar Theatre Junction", "violation_count": 956, "congestion_impact_score": 54.76, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 44, "latitude": 12.982117, "longitude": 77.606866, "police_station": "Shivajinagar", "junction_name": "BTP051 - Safina Plaza Junction", "violation_count": 623, "congestion_impact_score": 54.46, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 45, "latitude": 12.975107, "longitude": 77.574742, "police_station": "Upparpet", "junction_name": "BTP045 - Danvanthri Road Junction", "violation_count": 613, "congestion_impact_score": 54.38, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 46, "latitude": 12.96809, "longitude": 77.574725, "police_station": "Chamarajpet", "junction_name": "BTP083 - AS Char Street, Mysore Road", "violation_count": 831, "congestion_impact_score": 54.35, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 47, "latitude": 12.978925, "longitude": 77.579017, "police_station": "Upparpet", "junction_name": "BTP058 - Subbanna Junction", "violation_count": 952, "congestion_impact_score": 54.3, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 48, "latitude": 12.980023, "longitude": 77.609765, "police_station": "Shivajinagar", "junction_name": "BTP051 - Safina Plaza Junction", "violation_count": 398, "congestion_impact_score": 54.07, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 49, "latitude": 12.961869, "longitude": 77.599008, "police_station": "Ashok Nagar", "junction_name": "BTP172 - Nanjappa Circle", "violation_count": 609, "congestion_impact_score": 53.8, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 50, "latitude": 12.994063, "longitude": 77.589167, "police_station": "High ground", "junction_name": "BTP032 - Windsor Circle", "violation_count": 646, "congestion_impact_score": 53.64, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 51, "latitude": 12.991284, "longitude": 77.588563, "police_station": "High ground", "junction_name": "BTP032 - Windsor Circle", "violation_count": 747, "congestion_impact_score": 53.63, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 52, "latitude": 13.008209, "longitude": 77.554791, "police_station": "Malleshwaram", "junction_name": "BTP001 - 10th Cross, Dr. Rajkumar Road", "violation_count": 749, "congestion_impact_score": 53.51, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 53, "latitude": 12.96066, "longitude": 77.528994, "police_station": "Byatarayanapura", "junction_name": "BTP017 - Attiguppe Circle", "violation_count": 342, "congestion_impact_score": 53.49, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 54, "latitude": 12.979008, "longitude": 77.578115, "police_station": "Upparpet", "junction_name": "BTP058 - Subbanna Junction", "violation_count": 873, "congestion_impact_score": 53.36, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 55, "latitude": 12.981017, "longitude": 77.610759, "police_station": "Shivajinagar", "junction_name": "BTP051 - Safina Plaza Junction", "violation_count": 585, "congestion_impact_score": 53.05, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 56, "latitude": 13.008115, "longitude": 77.548398, "police_station": "Rajajinagar", "junction_name": "BTP023 - Mahalaxmi Layout Entrance", "violation_count": 366, "congestion_impact_score": 52.9, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 57, "latitude": 12.976933, "longitude": 77.57798, "police_station": "Upparpet", "junction_name": "BTP044 - Sagar Theatre Junction", "violation_count": 711, "congestion_impact_score": 52.87, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 58, "latitude": 12.97774, "longitude": 77.577059, "police_station": "Upparpet", "junction_name": "BTP040 - Elite Junction", "violation_count": 801, "congestion_impact_score": 52.68, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 59, "latitude": 12.969909, "longitude": 77.57573, "police_station": "City Market", "junction_name": "BTP043 - Upparpet Junction", "violation_count": 1591, "congestion_impact_score": 52.66, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 60, "latitude": 12.977992, "longitude": 77.579203, "police_station": "Upparpet", "junction_name": "BTP058 - Subbanna Junction", "violation_count": 806, "congestion_impact_score": 52.51, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 61, "latitude": 12.981223, "longitude": 77.598566, "police_station": "Shivajinagar", "junction_name": "BTP042 - Minsk Square Junction (CTO)", "violation_count": 568, "congestion_impact_score": 52.29, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 62, "latitude": 12.979309, "longitude": 77.564288, "police_station": "Magadi Road", "junction_name": "BTP074 - Leprosy Hospital Junction", "violation_count": 44, "congestion_impact_score": 52.29, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 63, "latitude": 12.974427, "longitude": 77.546938, "police_station": "Vijayanagara", "junction_name": "BTP069 - MC Circle", "violation_count": 426, "congestion_impact_score": 52.13, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 64, "latitude": 12.939754, "longitude": 77.695611, "police_station": "HAL Old Airport", "junction_name": "No Junction", "violation_count": 969, "congestion_impact_score": 51.99, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 65, "latitude": 13.00812, "longitude": 77.548613, "police_station": "Rajajinagar", "junction_name": "BTP023 - Mahalaxmi Layout Entrance", "violation_count": 347, "congestion_impact_score": 51.79, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 66, "latitude": 12.964237, "longitude": 77.578961, "police_station": "City Market", "junction_name": "BTP082 - KR Market Junction", "violation_count": 583, "congestion_impact_score": 51.78, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 67, "latitude": 12.998291, "longitude": 77.553043, "police_station": "Malleshwaram", "junction_name": "BTP008 - Navarang Theatre", "violation_count": 593, "congestion_impact_score": 51.7, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 68, "latitude": 12.997436, "longitude": 77.547926, "police_station": "Vijayanagara", "junction_name": "BTP205 - Modi Hospital Junction", "violation_count": 485, "congestion_impact_score": 51.51, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 69, "latitude": 12.964237, "longitude": 77.576217, "police_station": "City Market", "junction_name": "BTP082 - KR Market Junction", "violation_count": 635, "congestion_impact_score": 51.41, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 70, "latitude": 12.928071, "longitude": 77.580793, "police_station": "Jayanagara", "junction_name": "BTP189 - New Diagonal Road, Jayanagar", "violation_count": 416, "congestion_impact_score": 51.36, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 71, "latitude": 12.964868, "longitude": 77.57389, "police_station": "City Market", "junction_name": "BTP083 - AS Char Street, Mysore Road", "violation_count": 531, "congestion_impact_score": 51.15, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 72, "latitude": 12.973156, "longitude": 77.578012, "police_station": "Upparpet", "junction_name": "BTP044 - Sagar Theatre Junction", "violation_count": 532, "congestion_impact_score": 51.01, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 73, "latitude": 12.997628, "longitude": 77.549832, "police_station": "Vijayanagara", "junction_name": "BTP027 - Modi Bridge Junction", "violation_count": 559, "congestion_impact_score": 50.99, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 74, "latitude": 12.94516, "longitude": 77.571144, "police_station": "Basavanagudi", "junction_name": "BTP108 - Tagore Park Junction", "violation_count": 554, "congestion_impact_score": 50.7, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 75, "latitude": 12.936206, "longitude": 77.616006, "police_station": "Adugodi", "junction_name": "BTP135 - UCO Bank Junction", "violation_count": 410, "congestion_impact_score": 50.7, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 76, "latitude": 13.008306, "longitude": 77.554436, "police_station": "Malleshwaram", "junction_name": "BTP001 - 10th Cross, Dr. Rajkumar Road", "violation_count": 529, "congestion_impact_score": 50.69, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 77, "latitude": 12.943081, "longitude": 77.571093, "police_station": "Basavanagudi", "junction_name": "BTP108 - Tagore Park Junction", "violation_count": 658, "congestion_impact_score": 50.66, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 78, "latitude": 12.977727, "longitude": 77.575864, "police_station": "Upparpet", "junction_name": "BTP040 - Elite Junction", "violation_count": 503, "congestion_impact_score": 50.62, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 79, "latitude": 12.953692, "longitude": 77.542999, "police_station": "Byatarayanapura", "junction_name": "BTP095 - Satellite Bus Stand, Mysore Road", "violation_count": 479, "congestion_impact_score": 50.57, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 80, "latitude": 12.98282, "longitude": 77.607111, "police_station": "Shivajinagar", "junction_name": "BTP051 - Safina Plaza Junction", "violation_count": 490, "congestion_impact_score": 50.5, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 81, "latitude": 12.964675, "longitude": 77.576953, "police_station": "City Market", "junction_name": "BTP082 - KR Market Junction", "violation_count": 552, "congestion_impact_score": 50.42, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 82, "latitude": 13.000978, "longitude": 77.550223, "police_station": "Malleshwaram", "junction_name": "BTP026 - 1st Block Junction, Rajajinagar", "violation_count": 378, "congestion_impact_score": 50.42, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 83, "latitude": 12.96483, "longitude": 77.57505, "police_station": "City Market", "junction_name": "BTP083 - AS Char Street, Mysore Road", "violation_count": 571, "congestion_impact_score": 49.94, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 84, "latitude": 12.971308, "longitude": 77.597809, "police_station": "Cubbon Park", "junction_name": "BTP063 - Siddalingaiah Circle", "violation_count": 448, "congestion_impact_score": 49.8, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 85, "latitude": 13.008764, "longitude": 77.554998, "police_station": "Malleshwaram", "junction_name": "BTP001 - 10th Cross, Dr. Rajkumar Road", "violation_count": 851, "congestion_impact_score": 49.7, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 86, "latitude": 12.982984, "longitude": 77.607943, "police_station": "Shivajinagar", "junction_name": "BTP051 - Safina Plaza Junction", "violation_count": 211, "congestion_impact_score": 49.69, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 87, "latitude": 12.97775, "longitude": 77.580085, "police_station": "Upparpet", "junction_name": "BTP044 - Sagar Theatre Junction", "violation_count": 383, "congestion_impact_score": 49.64, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 88, "latitude": 12.998803, "longitude": 77.552744, "police_station": "Malleshwaram", "junction_name": "BTP008 - Navarang Theatre", "violation_count": 293, "congestion_impact_score": 49.53, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 89, "latitude": 12.959323, "longitude": 77.576128, "police_station": "City Market", "junction_name": "BTP104 - Medical College Circle", "violation_count": 473, "congestion_impact_score": 49.48, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 90, "latitude": 12.964034, "longitude": 77.583021, "police_station": "Halasuru Gate", "junction_name": "BTP080 - NR Road, SP Road Junction", "violation_count": 306, "congestion_impact_score": 49.41, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 91, "latitude": 12.975991, "longitude": 77.574857, "police_station": "Upparpet", "junction_name": "BTP045 - Danvanthri Road Junction", "violation_count": 427, "congestion_impact_score": 49.25, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 92, "latitude": 12.978894, "longitude": 77.579732, "police_station": "Upparpet", "junction_name": "BTP058 - Subbanna Junction", "violation_count": 472, "congestion_impact_score": 49.22, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 93, "latitude": 12.968717, "longitude": 77.537093, "police_station": "Vijayanagara", "junction_name": "BTP022 - Marenahalli Junction, Vijayanagar", "violation_count": 479, "congestion_impact_score": 49.2, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 94, "latitude": 12.97892, "longitude": 77.58093, "police_station": "Upparpet", "junction_name": "BTP058 - Subbanna Junction", "violation_count": 541, "congestion_impact_score": 49.15, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 95, "latitude": 12.981881, "longitude": 77.598823, "police_station": "Shivajinagar", "junction_name": "BTP042 - Minsk Square Junction (CTO)", "violation_count": 406, "congestion_impact_score": 49.11, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 96, "latitude": 12.970841, "longitude": 77.576199, "police_station": "City Market", "junction_name": "BTP043 - Upparpet Junction", "violation_count": 357, "congestion_impact_score": 49.02, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 97, "latitude": 12.939327, "longitude": 77.583987, "police_station": "Wilson Garden", "junction_name": "BTP186 - 9th Cross, 4th Main, Jayanagar", "violation_count": 303, "congestion_impact_score": 48.98, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 98, "latitude": 12.972992, "longitude": 77.581015, "police_station": "Upparpet", "junction_name": "BTP038 - Mysore Bank Junction", "violation_count": 361, "congestion_impact_score": 48.94, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 99, "latitude": 12.959104, "longitude": 77.576937, "police_station": "City Market", "junction_name": "BTP104 - Medical College Circle", "violation_count": 432, "congestion_impact_score": 48.8, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 100, "latitude": 12.975927, "longitude": 77.5811, "police_station": "Upparpet", "junction_name": "BTP038 - Mysore Bank Junction", "violation_count": 267, "congestion_impact_score": 48.8, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 101, "latitude": 12.979338, "longitude": 77.60697, "police_station": "Shivajinagar", "junction_name": "BTP051 - Safina Plaza Junction", "violation_count": 323, "congestion_impact_score": 48.76, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 102, "latitude": 12.97911, "longitude": 77.577184, "police_station": "Upparpet", "junction_name": "BTP058 - Subbanna Junction", "violation_count": 416, "congestion_impact_score": 48.71, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 103, "latitude": 12.929121, "longitude": 77.580709, "police_station": "Jayanagara", "junction_name": "BTP188 - 27th Cross, 4th Main, Jayanagar", "violation_count": 227, "congestion_impact_score": 48.69, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 104, "latitude": 13.001997, "longitude": 77.550232, "police_station": "Malleshwaram", "junction_name": "BTP026 - 1st Block Junction, Rajajinagar", "violation_count": 322, "congestion_impact_score": 48.6, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 105, "latitude": 12.963327, "longitude": 77.581043, "police_station": "City Market", "junction_name": "BTP080 - NR Road, SP Road Junction", "violation_count": 280, "congestion_impact_score": 48.55, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 106, "latitude": 12.966176, "longitude": 77.534972, "police_station": "Vijayanagara", "junction_name": "BTP016 - 5th Main Road, RPC Layout", "violation_count": 318, "congestion_impact_score": 48.53, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 107, "latitude": 12.975245, "longitude": 77.578834, "police_station": "Upparpet", "junction_name": "BTP044 - Sagar Theatre Junction", "violation_count": 266, "congestion_impact_score": 48.52, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 108, "latitude": 12.980792, "longitude": 77.603105, "police_station": "Shivajinagar", "junction_name": "BTP211 - Central Street Junction", "violation_count": 393, "congestion_impact_score": 48.39, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 109, "latitude": 12.978884, "longitude": 77.573134, "police_station": "Upparpet", "junction_name": "BTP057 - Anand Rao Junction", "violation_count": 321, "congestion_impact_score": 48.37, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 110, "latitude": 12.967052, "longitude": 77.578175, "police_station": "City Market", "junction_name": "BTP082 - KR Market Junction", "violation_count": 334, "congestion_impact_score": 48.37, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 111, "latitude": 13.003067, "longitude": 77.550112, "police_station": "Malleshwaram", "junction_name": "BTP026 - 1st Block Junction, Rajajinagar", "violation_count": 276, "congestion_impact_score": 48.33, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 112, "latitude": 12.953925, "longitude": 77.543659, "police_station": "Byatarayanapura", "junction_name": "BTP095 - Satellite Bus Stand, Mysore Road", "violation_count": 354, "congestion_impact_score": 48.29, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 113, "latitude": 12.993209, "longitude": 77.58904, "police_station": "High ground", "junction_name": "BTP032 - Windsor Circle", "violation_count": 444, "congestion_impact_score": 48.14, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 114, "latitude": 12.95904, "longitude": 77.577693, "police_station": "City Market", "junction_name": "BTP118 - Basappa Circle", "violation_count": 368, "congestion_impact_score": 48.11, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 115, "latitude": 13.008911, "longitude": 77.554355, "police_station": "Malleshwaram", "junction_name": "BTP001 - 10th Cross, Dr. Rajkumar Road", "violation_count": 626, "congestion_impact_score": 48.07, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 116, "latitude": 12.975718, "longitude": 77.561002, "police_station": "Magadi Road", "junction_name": "BTP074 - Leprosy Hospital Junction", "violation_count": 375, "congestion_impact_score": 48.05, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 117, "latitude": 12.998813, "longitude": 77.540937, "police_station": "Vijayanagara", "junction_name": "BTP206 - Shankara Mutt Circle, Vijayanagar", "violation_count": 285, "congestion_impact_score": 47.95, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 118, "latitude": 12.999942, "longitude": 77.550623, "police_station": "Malleshwaram", "junction_name": "BTP182 - 19th Main Junction, Rajajinagar", "violation_count": 276, "congestion_impact_score": 47.88, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 119, "latitude": 12.961133, "longitude": 77.57775, "police_station": "City Market", "junction_name": "BTP082 - KR Market Junction", "violation_count": 383, "congestion_impact_score": 47.82, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}, {"priority_rank": 120, "latitude": 13.035244, "longitude": 77.589002, "police_station": "Hebbala", "junction_name": "No Junction", "violation_count": 2284, "congestion_impact_score": 47.7, "risk_band": "Medium", "recommended_action": "Warning drive + repeat-offender monitoring"}];
+const map = document.getElementById('map');
+const minLat = Math.min(...points.map(p => p.latitude));
+const maxLat = Math.max(...points.map(p => p.latitude));
+const minLon = Math.min(...points.map(p => p.longitude));
+const maxLon = Math.max(...points.map(p => p.longitude));
+function color(band) {
+  return band === 'Critical' ? '#d62828' : band === 'High' ? '#f77f00' : band === 'Medium' ? '#fcbf49' : '#2a9d8f';
+}
+for (const p of points) {
+  const x = 5 + 90 * ((p.longitude - minLon) / Math.max(0.000001, maxLon - minLon));
+  const y = 95 - 90 * ((p.latitude - minLat) / Math.max(0.000001, maxLat - minLat));
+  const d = document.createElement('div');
+  const size = Math.max(8, Math.min(34, 7 + p.congestion_impact_score / 4));
+  d.className = 'dot';
+  d.style.left = x + '%';
+  d.style.top = y + '%';
+  d.style.width = size + 'px';
+  d.style.height = size + 'px';
+  d.style.background = color(p.risk_band);
+  d.title = `#${p.priority_rank} ${p.police_station} | ${p.junction_name} | score ${p.congestion_impact_score} | ${p.recommended_action}`;
+  map.appendChild(d);
+}
+</script>
+</body>
+</html>
