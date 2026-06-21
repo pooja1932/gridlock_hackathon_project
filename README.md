@@ -56,6 +56,27 @@ Open the main prototype:
 outputs/parksense_command_center.html
 ```
 
+## Deploy On GitHub Pages
+
+The dashboard is also copied to `docs/index.html`, so it can be deployed as a static GitHub Pages site.
+
+1. Push this repository to GitHub.
+2. Open the repository on GitHub.
+3. Go to **Settings > Pages**.
+4. Under **Build and deployment**, select:
+   - Source: `Deploy from a branch`
+   - Branch: `main`
+   - Folder: `/docs`
+5. Save.
+
+After GitHub finishes deploying, the live project URL will look like:
+
+```text
+https://<your-username>.github.io/gridlock_hackathon_project/
+```
+
+The deployed page uses `docs/index.html`, which is the ParkSense Command Center dashboard.
+
 ## Main Outputs
 
 - `outputs/hotspot_priority.csv`  
