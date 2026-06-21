@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -8,9 +8,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-  
+
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-  
+
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
@@ -34,6 +34,40 @@
       --border-color: rgba(255, 255, 255, 0.08);
       --text-main: #f1f3f9;
       --text-muted: #8490b1;
+      --bg-gradient-end: #0a0d16;
+      --glow-1: rgba(0, 240, 255, 0.04);
+      --glow-2: rgba(255, 59, 59, 0.03);
+      --bg-header: rgba(8, 10, 18, 0.95);
+      --bg-overlay: rgba(10, 12, 22, 0.92);
+      --bg-overlay-strong: rgba(10, 12, 22, 0.95);
+    }
+
+    /* Light Mode Palette */
+    html[data-theme="light"] {
+      --bg-dark: #f4f6fb;
+      --bg-sidebar: #ffffff;
+      --bg-panel: rgba(255, 255, 255, 0.9);
+      --bg-card: rgba(255, 255, 255, 0.7);
+      --bg-card-hover: rgba(237, 241, 250, 0.95);
+
+      --accent-cyan: #0088a8;
+      --accent-cyan-rgb: 0, 136, 168;
+      --accent-amber: #c97000;
+      --accent-amber-rgb: 201, 112, 0;
+      --accent-red: #d92b2b;
+      --accent-red-rgb: 217, 43, 43;
+      --accent-green: #00945a;
+      --accent-green-rgb: 0, 148, 90;
+
+      --border-color: rgba(15, 23, 42, 0.1);
+      --text-main: #14171f;
+      --text-muted: #5b6478;
+      --bg-gradient-end: #eef1f8;
+      --glow-1: rgba(0, 136, 168, 0.05);
+      --glow-2: rgba(217, 43, 43, 0.04);
+      --bg-header: rgba(255, 255, 255, 0.95);
+      --bg-overlay: rgba(255, 255, 255, 0.92);
+      --bg-overlay-strong: rgba(255, 255, 255, 0.95);
     }
 
     * {
@@ -53,14 +87,15 @@
       font-family: 'Plus Jakarta Sans', sans-serif;
       background-color: var(--bg-dark);
       background-image:
-        radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.04) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(255, 59, 59, 0.03) 0%, transparent 40%),
-        linear-gradient(180deg, #06070a 0%, #0a0d16 100%);
+        radial-gradient(circle at 10% 20%, var(--glow-1) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, var(--glow-2) 0%, transparent 40%),
+        linear-gradient(180deg, var(--bg-dark) 0%, var(--bg-gradient-end) 100%);
       color: var(--text-main);
       height: 100vh;
       width: 100vw;
       overflow: hidden;
       display: flex;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     /* Navigation Sidebar */
@@ -106,9 +141,9 @@
 
     /* Header */
     header {
-      height: 60px; background: rgba(8, 10, 18, 0.95); border-bottom: 1px solid var(--border-color);
+      height: 60px; background: var(--bg-header); border-bottom: 1px solid var(--border-color);
       display: flex; justify-content: space-between; align-items: center; padding: 0 24px;
-      z-index: 900; box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      z-index: 900; box-shadow: 0 4px 16px rgba(0,0,0,0.3); transition: background-color 0.3s ease;
     }
     .logo-text {
       font-size: 20px; font-weight: 800; letter-spacing: 0.5px;
@@ -121,6 +156,19 @@
       -webkit-text-fill-color: var(--accent-cyan);
     }
     .quick-stats-bar { display: flex; gap: 28px; }
+    .header-right-group { display: flex; align-items: center; gap: 24px; }
+    .theme-toggle-btn {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-muted);
+      width: 34px; height: 34px; border-radius: 8px; cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; position: relative;
+      transition: all 0.2s ease;
+    }
+    .theme-toggle-btn:hover { color: var(--accent-cyan); border-color: rgba(var(--accent-cyan-rgb), 0.3); background: rgba(0, 240, 255, 0.06); }
+    .theme-toggle-btn i { position: absolute; width: 17px; height: 17px; transition: opacity 0.2s ease, transform 0.3s ease; }
+    .theme-toggle-btn i[data-lucide="sun"] { opacity: 0; transform: rotate(-90deg) scale(0.5); }
+    .theme-toggle-btn i[data-lucide="moon"] { opacity: 1; transform: rotate(0) scale(1); }
+    [data-theme="light"] .theme-toggle-btn i[data-lucide="sun"] { opacity: 1; transform: rotate(0) scale(1); }
+    [data-theme="light"] .theme-toggle-btn i[data-lucide="moon"] { opacity: 0; transform: rotate(90deg) scale(0.5); }
     .header-stat { display: flex; flex-direction: column; align-items: flex-end; }
     .header-stat-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); }
     .header-stat-value { font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: 700; color: var(--accent-cyan); }
@@ -146,8 +194,30 @@
       display: flex; flex-direction: column; overflow-y: auto; padding: 20px; gap: 20px; height: 100%;
     }
     .panel-left { border-right: 1px solid var(--border-color); }
-    .panel-right { border-left: 1px solid var(--border-color); }
-    
+    .panel-right {
+      border-left: 1px solid var(--border-color);
+      transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), padding 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.25s ease;
+      position: relative;
+    }
+
+    /* Selected Hotspot collapse behavior */
+    .panel-right .section-title { justify-content: space-between; }
+    .panel-right-collapse-btn {
+      background: none; border: 1px solid var(--border-color); color: var(--text-muted);
+      width: 22px; height: 22px; border-radius: 5px; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s ease;
+    }
+    .panel-right-collapse-btn:hover { color: var(--accent-cyan); border-color: rgba(var(--accent-cyan-rgb), 0.3); background: rgba(0, 240, 255, 0.05); }
+    .panel-right-collapse-btn i { width: 14px; height: 14px; transition: transform 0.3s ease; }
+
+    .grid-command.right-collapsed { grid-template-columns: 320px 1fr 56px; }
+    .grid-command.right-collapsed .panel-right { padding: 20px 8px; align-items: center; }
+    .grid-command.right-collapsed .panel-right .section-title span,
+    .grid-command.right-collapsed #detailsContainer { opacity: 0; pointer-events: none; position: absolute; }
+    .grid-command.right-collapsed .panel-right-collapse-btn i { transform: rotate(180deg); }
+    .grid-command.right-collapsed .section-title { border-bottom: none; padding-bottom: 0; justify-content: center; }
+    .grid-command.right-collapsed #rightPanelIcon { display: none; }
+
     .glass-card {
       background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px;
       padding: 20px; transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1); position: relative;
@@ -199,9 +269,9 @@
     .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
     .detail-cell { background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 6px; }
     .detail-label { font-size: 9.5px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
-    .detail-value { font-size: 14px; font-weight: 700; margin-top: 2px; color: #fff;}
+    .detail-value { font-size: 14px; font-weight: 700; margin-top: 2px; color: var(--text-main);}
     .detail-value.mono { font-family: 'Share Tech Mono', monospace; }
-    
+
     .strategy-alert {
       background: rgba(0, 240, 255, 0.04); border: 1px solid rgba(0, 240, 255, 0.15);
       border-radius: 8px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; margin-top: 4px;
@@ -211,22 +281,33 @@
 
     /* Real Map Layout & Popups */
     .map-panel { position: relative; width: 100%; height: 100%; }
-    #map { width: 100%; height: 100%; background: #090a10; position: absolute; top: 0; left: 0; z-index: 1;}
-    
-    /* Leaflet Popup Dark Theme Customization */
+    #map { width: 100%; height: 100%; background: var(--bg-sidebar); position: absolute; top: 0; left: 0; z-index: 1; transition: background-color 0.3s ease;}
+
+    /* Dark-mode tile treatment: Mappls only ships a light raster style,
+       so dark mode is achieved by filtering the tile layer to a navy/teal palette. */
+    #map .leaflet-tile-pane {
+      transition: filter 0.3s ease;
+    }
+    html[data-theme="dark"] #map .leaflet-tile-pane {
+      filter: invert(1) hue-rotate(195deg) saturate(0.6) brightness(0.92) contrast(0.95);
+    }
+
+    /* Leaflet Popup Theme-Aware Customization */
     .leaflet-popup-content-wrapper {
-      background: rgba(10, 12, 22, 0.95); backdrop-filter: blur(12px); border: 1px solid var(--border-color);
-      color: #fff; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.5); padding: 0;
+      background: var(--bg-overlay-strong); backdrop-filter: blur(12px); border: 1px solid var(--border-color);
+      color: var(--text-main); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.5); padding: 0;
+      transition: background-color 0.3s ease;
     }
     .leaflet-popup-content { margin: 12px 14px; line-height: 1.4; }
-    .leaflet-popup-tip { background: rgba(10, 12, 22, 0.95); border: 1px solid var(--border-color); }
+    .leaflet-popup-tip { background: var(--bg-overlay-strong); border: 1px solid var(--border-color); }
     .leaflet-container a.leaflet-popup-close-button { color: var(--text-muted); padding: 4px; }
-    .leaflet-container a.leaflet-popup-close-button:hover { color: #fff; }
+    .leaflet-container a.leaflet-popup-close-button:hover { color: var(--text-main); }
 
     .map-hud { position: absolute; bottom: 20px; left: 20px; z-index: 1000; pointer-events: none; }
     .hud-card {
-      pointer-events: auto; background: rgba(10, 12, 22, 0.92); backdrop-filter: blur(12px);
+      pointer-events: auto; background: var(--bg-overlay); backdrop-filter: blur(12px);
       border: 1px solid var(--border-color); padding: 12px 16px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+      transition: background-color 0.3s ease;
     }
     .hud-title { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 6px; }
     .hud-legend { display: flex; flex-direction: column; gap: 6px; }
@@ -234,14 +315,15 @@
     .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
 
     /* Map Navigation Overlay / Controls */
-    .map-controls-overlay { 
-      position: absolute; top: 20px; right: 20px; z-index: 1000; 
-      display: flex; gap: 8px; background: rgba(10, 12, 22, 0.85); backdrop-filter: blur(12px);
+    .map-controls-overlay {
+      position: absolute; top: 20px; right: 20px; z-index: 1000;
+      display: flex; gap: 8px; background: var(--bg-overlay); backdrop-filter: blur(12px);
       padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      transition: background-color 0.3s ease;
     }
     .map-btn {
       background: transparent; border: 1px solid transparent; color: var(--text-muted);
-      padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; 
+      padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;
       display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;
     }
     .map-btn:hover { background: rgba(255,255,255,0.05); color: var(--text-main); }
@@ -276,17 +358,17 @@
     }
     .outcome-card i { position: absolute; top: 14px; right: 14px; color: var(--accent-cyan); opacity: 0.6; width: 18px;}
     .outcome-title { font-size: 9.5px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.8px; margin-bottom: 6px; }
-    .outcome-value { font-family: 'Share Tech Mono', monospace; font-size: 17px; font-weight: 800; color: #fff; }
+    .outcome-value { font-family: 'Share Tech Mono', monospace; font-size: 17px; font-weight: 800; color: var(--text-main); }
     .outcome-sub { font-size: 9.5px; color: var(--text-muted); margin-top: 4px; line-height: 1.35;}
 
     .table-container { width: 100%; overflow-x: auto; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); }
     table { width: 100%; border-collapse: collapse; text-align: left; }
-    th { 
-      font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); 
+    th {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted);
       padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); font-weight: 700;
       background: rgba(0,0,0,0.2);
     }
-    td { font-size: 12.5px; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); color: #fff; vertical-align: middle;}
+    td { font-size: 12.5px; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text-main); vertical-align: middle;}
     tr:hover td { background: rgba(255,255,255,0.02); }
 
     .score-badge {
@@ -301,7 +383,7 @@
     .efficiency-bar-group { display: flex; flex-direction: column; gap: 6px; }
     .efficiency-bar-info { display: flex; justify-content: space-between; font-size: 11.5px; font-weight: 600; }
     .efficiency-bar-label { color: var(--text-muted); }
-    .efficiency-bar-val { font-family: 'Share Tech Mono', monospace; color: #fff;}
+    .efficiency-bar-val { font-family: 'Share Tech Mono', monospace; color: var(--text-main);}
     .efficiency-bar-outer { width: 100%; height: 8px; background: rgba(255,255,255,0.03); border-radius: 4px; overflow: hidden; }
     .efficiency-bar-inner { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
 
@@ -355,38 +437,44 @@
   </nav>
 
   <div class="main-content">
-    
+
     <header>
       <div class="logo-container">
         <div class="logo-text">
           PARKSENSE AI <span class="logo-badge">PROTOTYPE</span>
         </div>
       </div>
-      <div class="quick-stats-bar">
-        <div class="header-stat">
-          <span class="header-stat-label">Records Used</span>
-          <span class="header-stat-value">298,445</span>
+      <div class="header-right-group">
+        <div class="quick-stats-bar">
+          <div class="header-stat">
+            <span class="header-stat-label">Records Used</span>
+            <span class="header-stat-value">298,445</span>
+          </div>
+          <div class="header-stat">
+            <span class="header-stat-label">Spatial Hotspots</span>
+            <span class="header-stat-value">7,814</span>
+          </div>
+          <div class="header-stat">
+            <span class="header-stat-label">High/Critical</span>
+            <span class="header-stat-value">12 Zones</span>
+          </div>
+          <div class="header-stat">
+            <span class="header-stat-label">Dataset Window</span>
+            <span class="header-stat-value">Nov '23 - Apr '24</span>
+          </div>
         </div>
-        <div class="header-stat">
-          <span class="header-stat-label">Spatial Hotspots</span>
-          <span class="header-stat-value">7,814</span>
-        </div>
-        <div class="header-stat">
-          <span class="header-stat-label">High/Critical</span>
-          <span class="header-stat-value">12 Zones</span>
-        </div>
-        <div class="header-stat">
-          <span class="header-stat-label">Dataset Window</span>
-          <span class="header-stat-value">Nov '23 - Apr '24</span>
-        </div>
+        <button class="theme-toggle-btn" id="themeToggle" title="Toggle light / dark mode">
+          <i data-lucide="sun"></i>
+          <i data-lucide="moon"></i>
+        </button>
       </div>
     </header>
 
     <div class="view-container">
 
       <div id="view-dashboard" class="view-pane active-view">
-        <div class="grid-command">
-          
+        <div class="grid-command" id="commandGrid">
+
           <div class="panel panel-left">
             <div>
               <div class="section-title">
@@ -408,7 +496,7 @@
 
           <div class="map-panel">
             <div id="map"></div>
-            
+
             <div class="map-controls-overlay">
               <button class="map-btn active" id="filter-all" onclick="setBandFilter('All')">
                 <i data-lucide="layers"></i> All Risk Bands
@@ -438,9 +526,12 @@
             </div>
           </div>
 
-          <div class="panel panel-right">
+          <div class="panel panel-right" id="rightPanel">
             <div class="section-title">
-              <i data-lucide="info"></i> Selected Hotspot
+              <i data-lucide="info" id="rightPanelIcon"></i> <span>Selected Hotspot</span>
+              <button class="panel-right-collapse-btn" id="rightPanelToggle" title="Collapse panel">
+                <i data-lucide="chevron-right"></i>
+              </button>
             </div>
             <div id="detailsContainer" style="display: flex; flex-direction: column; gap: 16px;">
               </div>
@@ -621,11 +712,11 @@
       }).addTo(map);
 
       L.control.zoom({ position: 'bottomright' }).addTo(map);
-      
+
       // Initialize both layers
       markersLayer = L.layerGroup().addTo(map);
       heatmapOverlay = L.layerGroup().addTo(map);
-      
+
       renderMarkers();
     }
 
@@ -634,7 +725,7 @@
       markersLayer.clearLayers();
       heatmapOverlay.clearLayers();
 
-      const filtered = hotspots.filter(j => 
+      const filtered = hotspots.filter(j =>
         (activeStationFilter === "All" || j.police_station === activeStationFilter) &&
         (activeBandFilter === "All" || j.risk_band === activeBandFilter)
       );
@@ -643,7 +734,7 @@
         const score = j.congestion_impact_score;
         let catClass = "watch-marker";
         let circleColor = "var(--accent-cyan)";
-        
+
         // Match the dot and circle colors to the risk band
         if (j.risk_band === "Critical") {
           catClass = "crit-marker";
@@ -686,7 +777,7 @@
 
         const popupContent = `
           <div style="font-family:'Plus Jakarta Sans',sans-serif; min-width: 160px; padding: 4px 0;">
-            <div style="font-weight:800; font-size:12.5px; margin-bottom: 2px; color: #fff;">${j.junction_name}</div>
+            <div style="font-weight:800; font-size:12.5px; margin-bottom: 2px; color: var(--text-main);">${j.junction_name}</div>
             <div style="color:var(--text-muted); font-size:9.5px; margin-bottom: 8px;">${j.police_station}</div>
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <span class="score-badge ${badgeCls}">${j.risk_band}</span>
@@ -694,7 +785,7 @@
             </div>
           </div>
         `;
-        
+
         marker.bindPopup(popupContent, { offset: L.point(0, -5) });
         marker.on('click', () => selectJunction(hotspots.indexOf(j)));
         markersLayer.addLayer(marker);
@@ -705,7 +796,7 @@
       const listEl = document.getElementById("hotspotList");
       listEl.innerHTML = "";
 
-      const filtered = hotspots.filter(j => 
+      const filtered = hotspots.filter(j =>
         (activeStationFilter === "All" || j.police_station === activeStationFilter) &&
         (activeBandFilter === "All" || j.risk_band === activeBandFilter)
       );
@@ -714,7 +805,7 @@
         const originalIndex = hotspots.indexOf(j);
         const activeClass = selectedJunction && (selectedJunction.priority_rank === j.priority_rank) ? "active" : "";
         const score = j.congestion_impact_score;
-        
+
         let scoreClass = "score-high";
         if (score > 60 || j.risk_band === "Critical") scoreClass = "score-critical";
         else if (j.risk_band === "Medium") scoreClass = "score-medium";
@@ -751,7 +842,7 @@
       detailContainer.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 4px;">
           <div>
-            <h4 style="font-size: 14px; font-weight: 800; color: #fff;">${junction.junction_name}</h4>
+            <h4 style="font-size: 14px; font-weight: 800; color: var(--text-main);">${junction.junction_name}</h4>
             <span style="font-size: 10px; color: var(--text-muted); font-weight: 500;">District: ${junction.police_station} &bull; Grid ${parseFloat(junction.latitude).toFixed(4)}, ${parseFloat(junction.longitude).toFixed(4)}</span>
           </div>
           <span class="score-badge ${badgeClass}">${parseFloat(score).toFixed(1)}</span>
@@ -768,11 +859,11 @@
           </div>
           <div class="detail-cell">
             <div class="detail-label">Frequency Score</div>
-            <div class="detail-value mono" style="color:#fff;">${junction.parking_violation_frequency_score}</div>
+            <div class="detail-value mono" style="color:var(--text-main);">${junction.parking_violation_frequency_score}</div>
           </div>
           <div class="detail-cell">
             <div class="detail-label">Vehicle Blockage</div>
-            <div class="detail-value mono" style="color:#fff;">${junction.vehicle_blockage_score}</div>
+            <div class="detail-value mono" style="color:var(--text-main);">${junction.vehicle_blockage_score}</div>
           </div>
         </div>
 
@@ -795,7 +886,7 @@
       if(band === 'All') document.getElementById('filter-all').classList.add('active');
       if(band === 'Critical') document.getElementById('filter-crit').classList.add('active');
       if(band === 'High') document.getElementById('filter-high').classList.add('active');
-      
+
       renderMarkers();
       populateHotspotList();
     }
@@ -814,7 +905,7 @@
           activeStationFilter = name;
           renderMarkers();
           populateHotspotList();
-          
+
           const filtered = hotspots.filter(j => activeStationFilter === "All" || j.police_station === activeStationFilter);
           if (filtered.length > 0) {
             const latLngs = filtered.map(f => [f.latitude, f.longitude]);
@@ -840,11 +931,11 @@
       btn.onclick = () => {
         document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.view-pane').forEach(v => v.classList.remove('active-view'));
-        
+
         btn.classList.add('active');
         const targetId = btn.dataset.target;
         document.getElementById(targetId).classList.add('active-view');
-        
+
         if (targetId === 'view-dashboard' && map) {
           setTimeout(() => map.invalidateSize(), 50);
         }
@@ -855,10 +946,32 @@
       map.setView([12.9716, 77.5946], 13, { animate: true });
     };
 
+    // Light / Dark mode toggle
+    function initThemeToggle() {
+      const root = document.documentElement;
+      const btn = document.getElementById('themeToggle');
+      btn.onclick = () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        if (map) setTimeout(() => map.invalidateSize(), 320);
+      };
+    }
+
+    // Selected Hotspot panel collapser
+    function initRightPanelCollapse() {
+      const grid = document.getElementById('commandGrid');
+      const toggle = document.getElementById('rightPanelToggle');
+      toggle.onclick = () => {
+        grid.classList.toggle('right-collapsed');
+        toggle.title = grid.classList.contains('right-collapsed') ? 'Expand panel' : 'Collapse panel';
+        if (map) setTimeout(() => map.invalidateSize(), 320);
+      };
+    }
+
     // Render Data Tables matching the photo exactly (wrapped in container, styled <th>/<td>)
     function renderTable(id, cols, data, limit) {
       const container = document.getElementById(id);
-      
+
       if(container.tagName.toLowerCase() === 'table') {
         const parent = container.parentElement;
         parent.classList.remove('table-container');
@@ -869,13 +982,13 @@
         parent.innerHTML = '';
         return renderTable(id, cols, data, limit);
       }
-      
+
       container.innerHTML = data.slice(0, limit).map(r => {
         let badge = cols[0];
         let primary = cols.length > 1 ? cols[1] : cols[0];
 
         let html = '<div class="outcome-card" style="padding: 24px; min-height: 160px; display: flex; flex-direction: column; justify-content: center;">';
-        
+
         // Top row
         html += '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">';
         html += '<div style="flex: 1; padding-right: 12px;">';
@@ -884,17 +997,17 @@
         html += '</div>';
         html += '<div style="transform: scale(1.15); transform-origin: top right;">' + (badge.html ? badge.html(r) : r[badge.key]) + '</div>';
         html += '</div>';
-        
+
         // Other columns
         cols.forEach((c) => {
            if (c !== primary && c !== badge) {
               html += '<div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px; margin-top: 12px;">';
               html += '<span class="outcome-sub" style="margin: 0; font-size: 11.5px;">' + c.label + '</span>';
-              html += '<span style="font-size: 14px; color: #fff; font-weight: 500;">' + (c.html ? c.html(r) : r[c.key]) + '</span>';
+              html += '<span style="font-size: 14px; color: var(--text-main); font-weight: 500;">' + (c.html ? c.html(r) : r[c.key]) + '</span>';
               html += '</div>';
            }
         });
-        
+
         html += '</div>';
         return html;
       }).join('');
@@ -933,6 +1046,8 @@
       initStationFilters();
       populateHotspotList();
       selectJunction(0);
+      initThemeToggle();
+      initRightPanelCollapse();
 
       // Populate Tables matching photo's format
       renderTable('hotspot-table', [
@@ -941,7 +1056,7 @@
         { label: 'Count', html: r => `<span style="font-family:'Share Tech Mono'">${parseInt(r.violation_count).toLocaleString()}</span>` },
         { label: 'Risk', html: r => rowBand(r.risk_band) }
       ], hotspots, 48);
-      
+
       renderTable('station-table', [
         { label: 'Station', html: r => `<strong style="font-size:13px">${r.police_station}</strong>` },
         { label: 'Violations', html: r => `<span style="font-family:'Share Tech Mono'">${parseInt(r.violation_count).toLocaleString()}</span>` },
